@@ -1,10 +1,9 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import {
   Navbar,
   Collapse,
   Nav,
-  NavItem,
   NavbarBrand,
   UncontrolledDropdown,
   DropdownToggle,
@@ -16,12 +15,23 @@ import {
 import Logo from "./Logo";
 import { ReactComponent as LogoWhite } from "../assets/images/logos/adminprowhite.svg";
 import user1 from "../assets/images/users/user4.jpg";
+import axios from 'axios';
+
+axios.defaults.xsrfCookieName = 'csrftoken';
+axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+axios.defaults.withCredentials = true;
+
+
+
+const client = axios.create({
+  baseURL: "http://127.0.0.1:8000"
+});
 
 const Header = () => {
+  const [currentUser, setCurrentUser] = useState(null); // Store user info
   const [isOpen, setIsOpen] = React.useState(false);
-
   const [dropdownOpen, setDropdownOpen] = React.useState(false);
-
+  const navigate = useNavigate(); // Initialize useNavigate
   const toggle = () => setDropdownOpen((prevState) => !prevState);
   const Handletoggle = () => {
     setIsOpen(!isOpen);
@@ -29,6 +39,34 @@ const Header = () => {
   const showMobilemenu = () => {
     document.getElementById("sidebarArea").classList.toggle("showSidebar");
   };
+
+  useEffect(() => {
+    client.get("/api/user")
+      .then(function (res) {
+        console.log("User data:", res.data); // Log response to check structure
+        setCurrentUser(res.data); // Adjust if necessary based on actual response structure
+      })
+      .catch(function (error) {
+        console.error("Error fetching user info:", error.response ? error.response.data : error.message);
+        setCurrentUser(null);
+      });
+  }, []);
+  
+
+
+  function submitLogout(e) {
+    e.preventDefault();
+    client.post(
+      "/api/logout",
+      { withCredentials: true }
+    ).then(function (res) {
+      setCurrentUser(null);
+      navigate('/login'); // Redirect to the login page
+    }).catch(error => {
+      console.error("Logout error:", error);
+    });
+  }
+
   return (
     <Navbar color="white" light expand="md" className="fix-header">
       <div className="d-flex align-items-center">
@@ -40,7 +78,7 @@ const Header = () => {
         </NavbarBrand>
         <Button
           color="primary"
-          className=" d-lg-none"
+          className="d-lg-none"
           onClick={() => showMobilemenu()}
         >
           <i className="bi bi-list"></i>
@@ -63,16 +101,6 @@ const Header = () => {
 
       <Collapse navbar isOpen={isOpen}>
         <Nav className="me-auto" navbar>
-         {/* <NavItem>
-            <Link to="/starter" className="nav-link">
-              Starter
-            </Link>
-          </NavItem>*/} 
-          {/*<NavItem>
-            <Link to="/about" className="nav-link">
-              About
-            </Link>
-          </NavItem>*/}
           <UncontrolledDropdown inNavbar nav>
             <DropdownToggle caret nav>
               Menu
@@ -95,13 +123,13 @@ const Header = () => {
             ></img>
           </DropdownToggle>
           <DropdownMenu>
-            <DropdownItem header>Info</DropdownItem>
+            <DropdownItem header>{currentUser ? `Hello, ${currentUser.user.username}` : 'Guest'}</DropdownItem>
             <DropdownItem>Mon Compte</DropdownItem>
             <DropdownItem>Modifier Profile</DropdownItem>
             <DropdownItem divider />
-           {/* <DropdownItem>My Balance</DropdownItem>
-            <DropdownItem>Inbox</DropdownItem>*/}
-            <DropdownItem>Se déconnecter</DropdownItem>
+            <form onSubmit={submitLogout}>
+              <Button type="submit" variant="light">Se déconnecter</Button>
+            </form>
           </DropdownMenu>
         </Dropdown>
       </Collapse>
