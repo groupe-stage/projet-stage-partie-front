@@ -4,13 +4,30 @@ import { Row, Col, Table, Card, CardTitle, CardBody, Button, ButtonGroup } from 
 import { FaEdit, FaTrashAlt, FaPlus } from 'react-icons/fa';
 import './UniteList.css';
 import { Link, useNavigate } from 'react-router-dom';
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
 
+axios.defaults.xsrfCookieName = 'csrftoken';
+axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+axios.defaults.withCredentials = true;
 const UniteList = () => {
   const [unites, setUnites] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('http://localhost:8000/unite/unites/')
+    axios.get('http://127.0.0.1:8000/unite/unites/')
       .then(response => {
         console.log(response.data);
         setUnites(response.data);
@@ -22,7 +39,13 @@ const UniteList = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:8000/unite/deleteUnite/${id}/`);
+      const csrftoken = getCookie('csrftoken');
+
+      await axios.delete(`http://127.0.0.1:8000/unite/deleteUnite/${id}/`, {
+        headers: {
+          'X-CSRFToken': csrftoken  // Include CSRF token in the headers
+        }
+      });
       setUnites(unites.filter(unite => unite.id_unite !== id));
       console.log(`Deleted unite with ID: ${id}`);
     } catch (error) {

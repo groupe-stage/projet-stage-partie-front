@@ -1,7 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Row, Col, Card, CardTitle, CardBody, Button, Form, FormGroup, Label, Input } from 'reactstrap';
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+axios.defaults.xsrfCookieName = 'csrftoken';
+axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+axios.defaults.withCredentials = true;
 
 const AddContrainte = () => {
     const [formData, setFormData] = useState({
@@ -13,6 +32,21 @@ const AddContrainte = () => {
         id_user: ''
     });
 
+    const [users, setUsers] = useState([]);
+
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        // Fetch users data
+        axios.get('http://127.0.0.1:8000/')  // Adjust the endpoint as needed
+            .then(response => {
+                setUsers(response.data);
+            })
+            .catch(error => {
+                console.error("Erreur lors de la récupération des utilisateurs!", error);
+            });
+    }, []);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({
@@ -21,31 +55,31 @@ const AddContrainte = () => {
         });
     };
 
-    const navigate = useNavigate();
     const handleSubmit = (e) => {
         e.preventDefault();
+        const csrftoken = getCookie('csrftoken');
 
         axios.post('http://127.0.0.1:8000/Contrainte/addContrainte/', formData, {
             headers: {
-                'Content-Type': 'application/json'
+                'X-CSRFToken': csrftoken  // Include CSRF token in the headers
             }
         })
-        .then(response => {
-            alert('Contrainte ajoutée avec succès !');
-            navigate('/ContrainteList');
-            setFormData({
-                nom_contrainte: '',
-                type_contrainte: '',
-                date_debut_contrainte: '',
-                date_fin_contrainte: '',
-                status_contrainte: '',
-                id_user: ''
+            .then(response => {
+                alert('Contrainte ajoutée avec succès !');
+                navigate('/ContrainteList');
+                setFormData({
+                    nom_contrainte: '',
+                    type_contrainte: '',
+                    date_debut_contrainte: '',
+                    date_fin_contrainte: '',
+                    status_contrainte: '',
+                    id_user: ''
+                });
+            })
+            .catch(error => {
+                console.error('Erreur lors de l\'ajout de la contrainte !', error);
+                alert('Erreur lors de l\'ajout de la contrainte.');
             });
-        })
-        .catch(error => {
-            console.error('Erreur lors de l\'ajout de la contrainte !', error);
-            alert('Erreur lors de l\'ajout de la contrainte.');
-        });
     };
 
     return (
@@ -111,23 +145,31 @@ const AddContrainte = () => {
                                 />
                             </FormGroup>
                             <FormGroup>
-                                <Label for="id_user">ID Utilisateur</Label>
+                                <Label for="id_user">Utilisateur</Label>
                                 <Input
                                     id="id_user"
                                     name="id_user"
+                                    type="select"
                                     value={formData.id_user}
                                     onChange={handleChange}
                                     required
-                                />
+                                >
+                                    <option value="">Sélectionnez un utilisateur</option>
+                                    {users.map(user => (
+                                        <option key={user.id_user} value={user.id_user}>
+                                            {user.username}
+                                        </option>
+                                    ))}
+                                </Input>
                             </FormGroup>
                             <Button type="submit">Ajouter la Contrainte</Button>
                         </Form>
                     </CardBody>
                 </Card>
                 <Link to="/ContrainteList">
-                  <Button color="secondary">
-                     Annuler
-                  </Button>
+                    <Button color="secondary">
+                        Annuler
+                    </Button>
                 </Link>
             </Col>
         </Row>

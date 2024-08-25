@@ -2,7 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Card, Row, Col, CardTitle, CardBody, Button, Form, FormGroup, Label, Input } from 'reactstrap';
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
 
+axios.defaults.xsrfCookieName = 'csrftoken';
+axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+axios.defaults.withCredentials = true;
 const UpdateUnite = () => {
   const { id_unite } = useParams();
   const [formData, setFormData] = useState({
@@ -11,7 +28,7 @@ const UpdateUnite = () => {
   });
 
   useEffect(() => {
-    axios.get(`http://localhost:8000/unite/updateUnite/${id_unite}/`)
+    axios.get(`http://127.0.0.1:8000/unite/updateUnite/${id_unite}/`)
       .then(response => {
         setFormData(response.data);
       })
@@ -31,10 +48,11 @@ const UpdateUnite = () => {
   const navigate = useNavigate();
   const handleSubmit = (e) => {
     e.preventDefault();
+    const csrftoken = getCookie('csrftoken');
 
-    axios.put(`http://localhost:8000/unite/updateUnite/${id_unite}/`, formData, {
+    axios.put(`http://127.0.0.1:8000/unite/updateUnite/${id_unite}/`, formData, {
       headers: {
-        'Content-Type': 'application/json'
+        'X-CSRFToken': csrftoken  // Include CSRF token in the headers
       }
     })
       .then(response => {

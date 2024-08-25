@@ -13,7 +13,24 @@ import {
   Label,
   Input
 } from 'reactstrap';
+axios.defaults.xsrfCookieName = 'csrftoken';
+axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+axios.defaults.withCredentials = true;
 
+const getCookie = (name) => {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+};
 const AddClass = () => {
   const [formData, setFormData] = useState({
     NbEtudiantClasse: '',
@@ -46,8 +63,13 @@ const AddClass = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const csrftoken = getCookie('csrftoken');  // Dynamically extract CSRF token
 
-    axios.post('http://127.0.0.1:8000/Classe/addClasse/', formData)
+    axios.post('http://127.0.0.1:8000/Classe/addClasse/', formData,{
+      headers: {
+          'X-CSRFToken': csrftoken  // Include CSRF token in the headers
+      }
+  })
       .then(response => {
         alert('Classe added successfully!');
         navigate('/ClasseList');

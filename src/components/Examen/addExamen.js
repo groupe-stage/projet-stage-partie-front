@@ -13,7 +13,24 @@ import {
   Label,
   Input
 } from 'reactstrap';
+axios.defaults.xsrfCookieName = 'csrftoken';
+axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+axios.defaults.withCredentials = true;
 
+const getCookie = (name) => {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+};
 const AddExamen = () => {
     const [formData, setFormData] = useState({
         nom_examen: '',
@@ -58,6 +75,7 @@ const AddExamen = () => {
     const navigate = useNavigate();  // Déclaration correcte
     const handleSubmit = (e) => {
         e.preventDefault();
+        const csrftoken = getCookie('csrftoken');  // Dynamically extract CSRF token
 
         const dataToSend = new FormData();
         Object.keys(formData).forEach(key => {
@@ -66,7 +84,7 @@ const AddExamen = () => {
 
         axios.post('http://127.0.0.1:8000/examen/addExamen/', dataToSend, {
             headers: {
-                'Content-Type': 'multipart/form-data'
+                'X-CSRFToken': csrftoken  // Include CSRF token in the headers
             }
         })
         .then(response => {

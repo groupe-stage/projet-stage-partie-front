@@ -9,7 +9,7 @@ const BlocList = () => {
   const [blocs, setBlocs] = useState([]);
 
   useEffect(() => {
-    axios.get('http://localhost:8000/bloc/displayAllBlocs/')
+    axios.get('http://127.0.0.1:8000/bloc/displayAllBlocs/')
       .then(response => {
         setBlocs(response.data);
       })

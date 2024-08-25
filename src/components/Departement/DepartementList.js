@@ -4,14 +4,31 @@ import { Row, Col, Table, Card, CardTitle, CardBody, Button, ButtonGroup } from 
 import { FaEdit, FaTrashAlt, FaPlus } from 'react-icons/fa';
 import './DepartementList.css'; // Ensure to include your CSS file
 import { Link, useNavigate } from 'react-router-dom';
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
 
+axios.defaults.xsrfCookieName = 'csrftoken';
+axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+axios.defaults.withCredentials = true;
 const DepartementList = () => {
   const [departements, setDepartements] = useState([]);
   const navigate = useNavigate();
 
 
 useEffect(() => {
-  axios.get('http://localhost:8000/departement/departements/')
+  axios.get('http://127.0.0.1:8000/departement/departements/')
     .then(response => {
       console.log(response.data);
       setDepartements(response.data);
@@ -23,7 +40,13 @@ useEffect(() => {
 
 const handleDelete = async (id) => {
   try {
-    await axios.delete(`http://localhost:8000/departement/deleteDep/${id}/`);
+    const csrftoken = getCookie('csrftoken');
+
+    await axios.delete(`http://127.0.0.1:8000/departement/deleteDep/${id}/`, {
+      headers: {
+        'X-CSRFToken': csrftoken  // Include CSRF token in the headers
+      }
+    });
     setDepartements(departements.filter(departement => departement.id_departement !== id));
     console.log(`Deleted departement with ID: ${id}`);
   } catch (error) {
@@ -79,9 +102,11 @@ const handleEdit = (id) => {
               </tbody>
             </Table>
             <div className="text-center mt-3">
+            <Link to="/addDep">
               <Button color="secondary" onClick={handleAdd}>
                 <FaPlus /> Ajouter un département
               </Button>
+              </Link>
             </div>
           </CardBody>
         </Card>

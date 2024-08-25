@@ -2,7 +2,24 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Row, Col, Form, FormGroup, Label, Input, Button } from 'reactstrap';
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
 
+axios.defaults.xsrfCookieName = 'csrftoken';
+axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+axios.defaults.withCredentials = true;
 const EditSalle = () => {
   const { id_salle } = useParams();
   const navigate = useNavigate();
@@ -20,7 +37,7 @@ const EditSalle = () => {
 
   useEffect(() => {
     // Fetch salle data
-    axios.get(`http://localhost:8000/salle/updateSalle/${id_salle}/`)
+    axios.get(`http://127.0.0.1:8000/salle/updateSalle/${id_salle}/`)
       .then(response => {
         setSalleData(response.data);
       })
@@ -29,7 +46,7 @@ const EditSalle = () => {
       });
     
     // Fetch blocs data
-    axios.get('http://localhost:8000/bloc/displayAllBlocs/')
+    axios.get('http://127.0.0.1:8000/bloc/displayAllBlocs/')
       .then(response => {
         setBlocs(response.data);
       })
@@ -38,7 +55,7 @@ const EditSalle = () => {
       });
 
     // Fetch examens data
-    axios.get('http://localhost:8000/examen/displayall/') // Assuming you have a similar endpoint for exams
+    axios.get('http://127.0.0.1:8000/examen/displayall/') // Assuming you have a similar endpoint for exams
       .then(response => {
         setExamens(response.data);
       })
@@ -56,7 +73,13 @@ const EditSalle = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    axios.put(`http://localhost:8000/salle/updateSalle/${id_salle}/`, salleData)
+    const csrftoken = getCookie('csrftoken');
+
+    axios.put(`http://127.0.0.1:8000/salle/updateSalle/${id_salle}/`, salleData, {
+      headers: {
+        'X-CSRFToken': csrftoken  // Include CSRF token in the headers
+      }
+    })
       .then(response => {
         alert('Salle modifiée avec succès!');
         navigate('/salle-list');

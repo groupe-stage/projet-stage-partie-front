@@ -2,7 +2,24 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Row, Col, Card, CardTitle, CardBody, Form, FormGroup, Label, Input, Button } from 'reactstrap';
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
 
+axios.defaults.xsrfCookieName = 'csrftoken';
+axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+axios.defaults.withCredentials = true;
 const UpdateDepartement = () => {
   const [departementData, setDepartementData] = useState({
     id_departement: '',
@@ -17,7 +34,7 @@ const UpdateDepartement = () => {
     const fetchDepartement = async () => {
       try {
         console.log(`Fetching departement with ID: ${id_departement}`);
-        const response = await axios.get(`http://localhost:8000/departement/updateDep/${id_departement}/`);
+        const response = await axios.get(`http://127.0.0.1:8000/departement/updateDep/${id_departement}/`);
         console.log('Departement data fetched:', response.data);
         setDepartementData(response.data);
       } catch (error) {
@@ -42,9 +59,14 @@ const UpdateDepartement = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+    const csrftoken = getCookie('csrftoken');
+
     try {
-      await axios.put(`http://localhost:8000/departement/updateDep/${id_departement}/`, departementData);
+      await axios.put(`http://127.0.0.1:8000/departement/updateDep/${id_departement}/`, departementData, {
+        headers: {
+          'X-CSRFToken': csrftoken  // Include CSRF token in the headers
+        }
+      });
       setMessage('Département mis à jour avec succès!');
       navigate('/DepartementList');
     } catch (error) {

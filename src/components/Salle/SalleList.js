@@ -13,7 +13,7 @@ const SalleList = () => {
   useEffect(() => {
     const fetchSalles = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/salle/displayAllS');
+        const response = await axios.get('http://127.0.0.1:8000/salle/displayAllS');
         setSalles(response.data);
       } catch (error) {
         console.error("Il y a eu une erreur!", error);
@@ -22,7 +22,7 @@ const SalleList = () => {
 
     const fetchBlocs = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/bloc/displayAllBlocs');
+        const response = await axios.get('http://127.0.0.1:8000/bloc/displayAllBlocs');
         setBlocs(response.data);
       } catch (error) {
         console.error("Erreur lors de la récupération des blocs:", error);
@@ -31,7 +31,7 @@ const SalleList = () => {
 
     const fetchExamens = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/examen/displayall');
+        const response = await axios.get('http://127.0.0.1:8000/examen/displayall');
         setExamens(response.data);
       } catch (error) {
         console.error("Erreur lors de la récupération des examens:", error);

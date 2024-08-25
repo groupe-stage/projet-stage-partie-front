@@ -14,7 +14,7 @@ const NiveauList = () => {
   const navigate = useNavigate(); // Use navigate hook from react-router-dom
 
   useEffect(() => {
-    axios.get('http://localhost:8000/Niveau/niveau_list/')
+    axios.get('http://127.0.0.1:8000/Niveau/niveau_list/')
       .then(response => {
         setNiveaux(response.data);
       })

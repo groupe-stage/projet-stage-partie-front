@@ -6,15 +6,26 @@ import './ModuleList.css'; // Ensure to include your CSS file
 import { Link } from 'react-router-dom';
 
 const ModuleList = () => {
-  const [module, setModule] = useState([]);
+  const [modules, setModules] = useState([]);
+  const [niveaux, setNiveaux] = useState([]);
 
   useEffect(() => {
-    axios.get('http://localhost:8000/module/displayall/')
+    // Fetch all modules
+    axios.get('http://127.0.0.1:8000/module/displayall/')
       .then(response => {
-        setModule(response.data);
+        setModules(response.data);
       })
       .catch(error => {
-        console.error("Il y a eu une erreur!", error);
+        console.error("Il y a eu une erreur lors de la récupération des modules!", error);
+      });
+
+    // Fetch all niveaux
+    axios.get('http://127.0.0.1:8000/Niveau/displayallNiveaux/')
+      .then(response => {
+        setNiveaux(response.data);
+      })
+      .catch(error => {
+        console.error("Il y a eu une erreur lors de la récupération des niveaux!", error);
       });
   }, []);
 
@@ -33,6 +44,12 @@ const ModuleList = () => {
     console.log('Add new module');
   };
 
+  // Function to get the libelleNiv based on id_niveau
+  const getLibelleNiv = (id) => {
+    const niveau = niveaux.find(niveau => niveau.id_niveau === id);
+    return niveau ? niveau.libelleNiv : 'Inconnu';
+  };
+
   return (
     <Row>
       <Col lg="12">
@@ -45,30 +62,29 @@ const ModuleList = () => {
             <Table className="modern-table" responsive>
               <thead>
                 <tr>
-                 
-                  <th>Nom d'un module</th>
-                  <th>Duré du module (en heure)</th>
+                  <th>Nom du module</th>
+                  <th>Durée du module (en heure)</th>
                   <th>Niveau</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {module.map(module => (
+                {modules.map(module => (
                   <tr key={module.id_module}>
-            
                     <td>{module.nom_module}</td>
                     <td>{module.duree_module}</td>
-                    <td>{module.id_niveau}</td>
+                    <td>{getLibelleNiv(module.id_niveau)}</td>
                     <td>
                       <ButtonGroup>
-                      <Link to={`/module-up/${module.id_module}`}>
-                        <Button color="secondary" onClick={() => handleEdit(module.id_module)}>
-                          <FaEdit />
-                        </Button>
+                        <Link to={`/module-up/${module.id_module}`}>
+                          <Button color="secondary" onClick={() => handleEdit(module.id_module)}>
+                            <FaEdit />
+                          </Button>
                         </Link>
                         <Link to={`/module-del/${module.id_module}`}>
-                        <Button color="dark" onClick={() => handleDelete(module.id_module)}>
-                          <FaTrashAlt />
-                        </Button>
+                          <Button color="dark" onClick={() => handleDelete(module.id_module)}>
+                            <FaTrashAlt />
+                          </Button>
                         </Link>
                       </ButtonGroup>
                     </td>
@@ -77,11 +93,10 @@ const ModuleList = () => {
               </tbody>
             </Table>
             <div className="text-center mt-3">
-               
-                <Link to="/addModule">
-              <Button color="secondary" onClick={handleAdd}>
-                <FaPlus /> Ajouter un module
-              </Button>
+              <Link to="/addModule">
+                <Button color="secondary" onClick={handleAdd}>
+                  <FaPlus /> Ajouter un module
+                </Button>
               </Link>
             </div>
           </CardBody>

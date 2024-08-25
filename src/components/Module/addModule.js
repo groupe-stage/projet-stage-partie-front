@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link , useNavigate} from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
   Card,
@@ -14,13 +14,46 @@ import {
   Input
 } from 'reactstrap';
 
+axios.defaults.xsrfCookieName = 'csrftoken';
+axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+axios.defaults.withCredentials = true;
+
+const getCookie = (name) => {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+};
+
 const AddModule = () => {
     const [formData, setFormData] = useState({
         nom_module: '',
         duree_module: '',
         id_niveau: '',
-       
     });
+
+    const [niveaux, setNiveaux] = useState([]);
+
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        // Fetch levels data
+        axios.get('http://127.0.0.1:8000/Niveau/displayallNiveaux/')  // Adjust the endpoint as needed
+            .then(response => {
+                setNiveaux(response.data);
+            })
+            .catch(error => {
+                console.error("Erreur lors de la récupération des niveaux!", error);
+            });
+    }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -30,35 +63,27 @@ const AddModule = () => {
         });
     };
 
-   
-    const navigate = useNavigate();  // Déclaration correcte
     const handleSubmit = (e) => {
         e.preventDefault();
+        const csrftoken = getCookie('csrftoken');
 
-        const dataToSend = new FormData();
-        Object.keys(formData).forEach(key => {
-            dataToSend.append(key, formData[key]);
-        });
-
-       
-        axios.post('http://127.0.0.1:8000/module/addModule/', dataToSend, {
+        axios.post('http://127.0.0.1:8000/module/addModule/', formData, {
             headers: {
-                'Content-Type': 'multipart/form-data'
+                'X-CSRFToken': csrftoken
             }
         })
         .then(response => {
-            alert('Module added successfully!');
+            alert('Module ajouté avec succès!');
             navigate('/module-list'); 
             setFormData({
                 nom_module: '',
                 duree_module: '',
                 id_niveau: '',
-               
             });
         })
         .catch(error => {
-            console.error('There was an error adding the module!', error);
-            alert('Error adding module.');
+            console.error('Erreur lors de l\'ajout du module!', error);
+            alert('Erreur lors de l\'ajout du module.');
         });
     };
 
@@ -81,7 +106,6 @@ const AddModule = () => {
                                     onChange={handleChange}
                                     required
                                 />
-                            
                             </FormGroup>
                             <FormGroup>
                                 <Label for="duree_module">Durée (en heure)</Label>
@@ -98,24 +122,28 @@ const AddModule = () => {
                                 <Input
                                     id="id_niveau"
                                     name="id_niveau"
+                                    type="select"
                                     value={formData.id_niveau}
                                     onChange={handleChange}
-                                    placeholder="Entrez l'ID du niveau"
                                     required
-                                />
+                                >
+                                    <option value="">Sélectionnez un niveau</option>
+                                    {niveaux.map(niveau => (
+                                        <option key={niveau.id_niveau} value={niveau.id_niveau}>
+                                            {niveau.libelleNiv	}
+                                        </option>
+                                    ))}
+                                </Input>
                             </FormGroup>
-                           
-                           
-                            
                             <Button type="submit">Ajouter le module</Button>
                         </Form>
                     </CardBody>
                 </Card>
                 <Link to="/module-list">
-              <Button color="secondary" >
-                 Annuler
-              </Button>
-              </Link>
+                    <Button color="secondary">
+                        Annuler
+                    </Button>
+                </Link>
             </Col>
         </Row>
     );

@@ -3,7 +3,24 @@ import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
 import { Row, Col, Card, CardTitle, CardBody, Form, FormGroup, Label, Input, Button } from 'reactstrap';
 import { useNavigate } from 'react-router-dom';
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
 
+axios.defaults.xsrfCookieName = 'csrftoken';
+axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+axios.defaults.withCredentials = true;
 const UpdateBloc = () => {
   const [blocData, setBlocData] = useState({
     nom_bloc: '',
@@ -18,7 +35,7 @@ const UpdateBloc = () => {
     const fetchBloc = async () => {
       try {
         console.log(`Fetching bloc with ID: ${id_bloc}`);
-        const response = await axios.get(`http://localhost:8000/bloc/updateBloc/${id_bloc}/`);
+        const response = await axios.get(`http://127.0.0.1:8000/bloc/updateBloc/${id_bloc}/`);
         console.log('Bloc data fetched:', response.data);
         setBlocData(response.data);
       } catch (error) {
@@ -38,12 +55,13 @@ const UpdateBloc = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const csrftoken = getCookie('csrftoken');
 
     try {
-      await axios.put(`http://localhost:8000/bloc/updateBloc/${id_bloc}/`, blocData, {
+      await axios.put(`http://127.0.0.1:8000/bloc/updateBloc/${id_bloc}/`, blocData, {
         headers: {
-          'Content-Type': 'application/json',
-        },
+          'X-CSRFToken': csrftoken  // Include CSRF token in the headers
+        }
       });
       setMessage('Bloc mis à jour avec succès!');
       navigate('/bloc-list'); 

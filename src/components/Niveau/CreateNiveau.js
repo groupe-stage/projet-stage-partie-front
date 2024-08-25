@@ -2,7 +2,24 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Row, Col, Card, CardTitle, CardBody, Button, Form, FormGroup, Label, Input } from 'reactstrap';
+axios.defaults.xsrfCookieName = 'csrftoken';
+axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+axios.defaults.withCredentials = true;
 
+const getCookie = (name) => {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+};
 const AddNiveau = () => {
   const [formData, setFormData] = useState({
     libelleNiv: '',
@@ -35,13 +52,18 @@ const AddNiveau = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const csrftoken = getCookie('csrftoken');  // Dynamically extract CSRF token
 
     const dataToSend = {
       ...formData,
       specialite: ["Data Science", "GAMIX", "BI", "TWIN"].includes(formData.specialite) ? formData.specialite : ''
     };
 
-    axios.post('http://127.0.0.1:8000/Niveau/addNiveau/', dataToSend)
+    axios.post('http://127.0.0.1:8000/Niveau/addNiveau/', dataToSend,{
+      headers: {
+          'X-CSRFToken': csrftoken  // Include CSRF token in the headers
+      }
+  })
       .then(response => {
         alert('Niveau added successfully!');
         const classes = generateClasses();

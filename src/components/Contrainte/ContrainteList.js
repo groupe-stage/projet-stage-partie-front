@@ -4,13 +4,30 @@ import { Row, Col, Table, Card, CardTitle, CardBody, Button, ButtonGroup } from 
 import { FaEdit, FaTrashAlt, FaPlus } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 import './ContrainteList.css';
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
 
+axios.defaults.xsrfCookieName = 'csrftoken';
+axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+axios.defaults.withCredentials = true;
 const ContrainteList = () => {
   const [contraintes, setContraintes] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('http://localhost:8000/Contrainte/contraintes/')
+    axios.get('http://127.0.0.1:8000/Contrainte/contraintes/')
       .then(response => {
         setContraintes(response.data);
       })
@@ -21,7 +38,13 @@ const ContrainteList = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:8000/Contrainte/deleteContrainte/${id}/`);
+      const csrftoken = getCookie('csrftoken');
+
+      await axios.delete(`http://127.0.0.1:8000/Contrainte/deleteContrainte/${id}/`, {
+        headers: {
+          'X-CSRFToken': csrftoken  // Include CSRF token in the headers
+        }
+      });
       setContraintes(contraintes.filter(contrainte => contrainte.id_contrainte !== id));
       console.log(`Deleted contrainte with ID: ${id}`);
     } catch (error) {

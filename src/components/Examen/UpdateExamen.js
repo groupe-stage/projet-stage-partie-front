@@ -18,33 +18,56 @@ const UpdateExamen = () => {
   const [modules, setModules] = useState([]);
   const [message, setMessage] = useState('');
   const { id_examen } = useParams();
-  const navigate = useNavigate();  
+  const navigate = useNavigate();
+
+  // Utility function to get CSRF token
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  axios.defaults.xsrfCookieName = 'csrftoken';
+  axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+  axios.defaults.withCredentials = true;
 
   useEffect(() => {
     const fetchExamen = async () => {
       try {
-        const response = await axios.get(`http://localhost:8000/examen/updateExamen/${id_examen}/`);
+        const response = await axios.get(`http://127.0.0.1:8000/examen/updateExamen/${id_examen}/`);
         setExamenData(response.data);
       } catch (error) {
         console.error('Erreur lors de la récupération des données examen:', error);
+        setMessage("Erreur lors de la récupération des données de l'examen.");
       }
     };
 
     const fetchSessions = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/session/displayall/'); // Adjust the URL according to your API
+        const response = await axios.get('http://127.0.0.1:8000/session/displayall/');
         setSessions(response.data);
       } catch (error) {
         console.error('Erreur lors de la récupération des données sessions:', error);
+        setMessage("Erreur lors de la récupération des sessions.");
       }
     };
 
     const fetchModules = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/module/displayall/'); // Adjust the URL according to your API
+        const response = await axios.get('http://127.0.0.1:8000/module/displayall/');
         setModules(response.data);
       } catch (error) {
         console.error('Erreur lors de la récupération des données modules:', error);
+        setMessage("Erreur lors de la récupération des modules.");
       }
     };
 
@@ -62,20 +85,17 @@ const UpdateExamen = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const formData = new FormData();
-    for (const key in examenData) {
-      formData.append(key, examenData[key]);
-    }
+    const csrftoken = getCookie('csrftoken');
 
     try {
-      await axios.put(`http://localhost:8000/examen/updateExamen/${id_examen}/`, formData, {
+      await axios.put(`http://127.0.0.1:8000/examen/updateExamen/${id_examen}/`, examenData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+          'X-CSRFToken': csrftoken,
+          'Content-Type': 'application/json' // Ensure this matches the backend's expectations
+        }
       });
       setMessage('Examen mis à jour avec succès!');
-      navigate('/examen-list'); 
+      navigate('/examen-list');
     } catch (error) {
       console.error('Erreur lors de la mise à jour des données examen:', error);
       setMessage("Échec de la mise à jour de l'examen.");
@@ -120,6 +140,7 @@ const UpdateExamen = () => {
                 <Input
                   id="duree_examen"
                   name="duree_examen"
+                  type="number"
                   value={examenData.duree_examen}
                   onChange={handleChange}
                   required

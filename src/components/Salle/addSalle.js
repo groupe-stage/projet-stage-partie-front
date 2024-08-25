@@ -2,7 +2,24 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Row, Col, Form, FormGroup, Label, Input, Button } from 'reactstrap';
 import { useNavigate } from 'react-router-dom';
+axios.defaults.xsrfCookieName = 'csrftoken';
+axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+axios.defaults.withCredentials = true;
 
+const getCookie = (name) => {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+};
 const AddSalle = () => {
   const [salleData, setSalleData] = useState({
     nom_salle: '',
@@ -17,7 +34,7 @@ const AddSalle = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('http://localhost:8000/bloc/displayAllBlocs/')
+    axios.get('http://127.0.0.1:8000/bloc/displayAllBlocs/')
       .then(response => {
         setBlocs(response.data);
       })
@@ -25,7 +42,7 @@ const AddSalle = () => {
         console.error("Il y a eu une erreur!", error);
       });
 
-    axios.get('http://localhost:8000/examen/displayall/') // Assuming you have a similar endpoint for exams
+    axios.get('http://127.0.0.1:8000/examen/displayall/') // Assuming you have a similar endpoint for exams
       .then(response => {
         setExamens(response.data);
       })
@@ -43,7 +60,13 @@ const AddSalle = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    axios.post('http://localhost:8000/salle/addSalle/', salleData)
+    const csrftoken = getCookie('csrftoken');  // Dynamically extract CSRF token
+
+    axios.post('http://127.0.0.1:8000/salle/addSalle/', salleData,{
+      headers: {
+          'X-CSRFToken': csrftoken  // Include CSRF token in the headers
+      }
+  })
       .then(response => {
         alert('Salle ajoutée avec succès!');
         navigate('/salle-list');

@@ -13,7 +13,7 @@ const ExamenList = () => {
   useEffect(() => {
     const fetchExamen = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/examen/displayall/');
+        const response = await axios.get('http://127.0.0.1:8000/examen/displayall/');
         setExamen(response.data);
       } catch (error) {
         console.error("Il y a eu une erreur!", error);
@@ -22,7 +22,7 @@ const ExamenList = () => {
 
     const fetchSessions = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/session/displayall');
+        const response = await axios.get('http://127.0.0.1:8000/session/displayall');
         setSessions(response.data);
       } catch (error) {
         console.error("Erreur lors de la récupération des sessions:", error);
@@ -31,7 +31,7 @@ const ExamenList = () => {
 
     const fetchModules = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/module/displayall');
+        const response = await axios.get('http://127.0.0.1:8000/module/displayall');
         setModules(response.data);
       } catch (error) {
         console.error("Erreur lors de la récupération des modules:", error);

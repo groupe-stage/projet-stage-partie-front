@@ -16,7 +16,7 @@ const ClassList = () => {
 
   useEffect(() => {
     // Fetch classes
-    axios.get('http://localhost:8000/Classe/classe_list/')
+    axios.get('http://127.0.0.1:8000/Classe/classe_list/')
       .then(response => {
         setClasses(response.data);
       })
@@ -25,7 +25,7 @@ const ClassList = () => {
       });
     
     // Fetch niveau data
-    axios.get('http://localhost:8000/Niveau/niveau_list/') // Update the URL to your API endpoint
+    axios.get('http://127.0.0.1:8000/Niveau/niveau_list/') // Update the URL to your API endpoint
       .then(response => {
         setNivData(response.data);
       })

@@ -5,11 +5,14 @@ import { FaEdit, FaTrashAlt, FaPlus } from 'react-icons/fa';
 import './SessionList.css'; // Ensure to include your CSS file
 import { Link } from 'react-router-dom';
 
+
+
+
 const SessionList = () => {
   const [session, setSession] = useState([]);
 
   useEffect(() => {
-    axios.get('http://localhost:8000/session/displayall/')
+    axios.get("http://127.0.0.1:8000/session/displayall")
       .then(response => {
         setSession(response.data);
       })
@@ -17,6 +20,7 @@ const SessionList = () => {
         console.error("Il y a eu une erreur!", error);
       });
   }, []);
+
 
   const handleDelete = (id) => {
     // Implement the delete functionality
