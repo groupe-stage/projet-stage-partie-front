@@ -91,7 +91,6 @@ const UpdateExamen = () => {
       await axios.put(`http://127.0.0.1:8000/examen/updateExamen/${id_examen}/`, examenData, {
         headers: {
           'X-CSRFToken': csrftoken,
-          'Content-Type': 'application/json' // Ensure this matches the backend's expectations
         }
       });
       setMessage('Examen mis à jour avec succès!');
@@ -101,6 +100,7 @@ const UpdateExamen = () => {
       setMessage("Échec de la mise à jour de l'examen.");
     }
   };
+  console.log('Examen data being sent:', examenData);
 
   return (
     <Row>
@@ -176,7 +176,7 @@ const UpdateExamen = () => {
                   <option value="">Sélectionnez une session</option>
                   {sessions.map((session) => (
                     <option key={session.id} value={session.id}>
-                      {session.nom_session}
+                      {session.id_session}
                     </option>
                   ))}
                 </Input>
@@ -195,7 +195,7 @@ const UpdateExamen = () => {
                   <option value="">Sélectionnez un module</option>
                   {modules.map((module) => (
                     <option key={module.id} value={module.id}>
-                      {module.nom_module}
+                      {module.id_module}
                     </option>
                   ))}
                 </Input>

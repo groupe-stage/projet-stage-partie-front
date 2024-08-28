@@ -142,7 +142,7 @@ function App() {
                 required
                 fullWidth
                 id="email"
-                label={registrationToggle ? "Email" : "Identifiant"}
+                label={registrationToggle ? "Email" : "Email"}
                 name="email"
                 autoComplete="email"
                 autoFocus
@@ -219,7 +219,7 @@ function App() {
               {!registrationToggle && (
                 <FormControlLabel
                   control={<Checkbox value="remember" color="primary" onChange={handleRememberMeChange} />}
-                  label="Remember me"
+                  label="Consulter"
                 />
               )}
               <Button

@@ -18,6 +18,7 @@ axios.defaults.xsrfCookieName = 'csrftoken';
 axios.defaults.xsrfHeaderName = 'X-CSRFToken';
 axios.defaults.withCredentials = true;
 
+// Fonction pour obtenir un cookie spécifique par son nom
 const getCookie = (name) => {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -45,8 +46,8 @@ const AddModule = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Fetch levels data
-        axios.get('http://127.0.0.1:8000/Niveau/displayallNiveaux/')  // Adjust the endpoint as needed
+        // Récupérer les données des niveaux
+        axios.get('http://127.0.0.1:8000/Niveau/displayallNiveaux/')  // Ajuster le point de terminaison si nécessaire
             .then(response => {
                 setNiveaux(response.data);
             })
@@ -55,6 +56,7 @@ const AddModule = () => {
             });
     }, []);
 
+    // Gérer les changements dans le formulaire
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({
@@ -63,6 +65,7 @@ const AddModule = () => {
         });
     };
 
+    // Soumettre le formulaire
     const handleSubmit = (e) => {
         e.preventDefault();
         const csrftoken = getCookie('csrftoken');
@@ -108,7 +111,7 @@ const AddModule = () => {
                                 />
                             </FormGroup>
                             <FormGroup>
-                                <Label for="duree_module">Durée (en heure)</Label>
+                                <Label for="duree_module">Durée (en heures)</Label>
                                 <Input
                                     id="duree_module"
                                     name="duree_module"
@@ -129,8 +132,8 @@ const AddModule = () => {
                                 >
                                     <option value="">Sélectionnez un niveau</option>
                                     {niveaux.map(niveau => (
-                                        <option key={niveau.id_niveau} value={niveau.id_niveau}>
-                                            {niveau.libelleNiv	}
+                                        <option key={niveau.id} value={niveau.id}>
+                                            {niveau.id_niveau}
                                         </option>
                                     ))}
                                 </Input>

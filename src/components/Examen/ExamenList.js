@@ -1,20 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Row, Col, Table, Card, CardTitle, CardBody, Button, ButtonGroup } from 'reactstrap';
-import { FaEdit, FaTrashAlt, FaPlus } from 'react-icons/fa';
-import './ExamenList.css'; // Ensure to include your CSS file
+import { Row, Col, Table, Card, CardTitle, CardBody, Button, ButtonGroup, FormGroup, Input } from 'reactstrap';
+import { FaEdit, FaTrashAlt, FaPlus, FaSortAlphaDown, FaSortAlphaUp } from 'react-icons/fa';
+import './ExamenList.css'; // Assurez-vous d'inclure votre fichier CSS
 import { Link } from 'react-router-dom';
 
 const ExamenList = () => {
-  const [examen, setExamen] = useState([]);
+  const [examens, setExamens] = useState([]);
   const [sessions, setSessions] = useState([]);
   const [modules, setModules] = useState([]);
+  const [filteredExamens, setFilteredExamens] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortField, setSortField] = useState('');
+  const [sortOrder, setSortOrder] = useState('asc'); // 'asc' ou 'desc'
 
   useEffect(() => {
-    const fetchExamen = async () => {
+    const fetchExamens = async () => {
       try {
         const response = await axios.get('http://127.0.0.1:8000/examen/displayall/');
-        setExamen(response.data);
+        setExamens(response.data);
+        setFilteredExamens(response.data); // Initialiser les examens filtrés avec tous les examens
       } catch (error) {
         console.error("Il y a eu une erreur!", error);
       }
@@ -38,36 +43,62 @@ const ExamenList = () => {
       }
     };
 
-    fetchExamen();
+    fetchExamens();
     fetchSessions();
     fetchModules();
   }, []);
 
+  useEffect(() => {
+    const filtered = examens.filter(examen =>
+      examen.nom_examen.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    const sorted = filtered.sort((a, b) => {
+      if (sortField) {
+        if (a[sortField] < b[sortField]) return sortOrder === 'asc' ? -1 : 1;
+        if (a[sortField] > b[sortField]) return sortOrder === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+
+    setFilteredExamens(sorted);
+  }, [searchQuery, sortField, sortOrder, examens]);
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const handleSort = (field) => {
+    const newOrder = (sortField === field && sortOrder === 'asc') ? 'desc' : 'asc';
+    setSortField(field);
+    setSortOrder(newOrder);
+  };
+
   const handleDelete = (id) => {
-    // Implement the delete functionality
-    console.log(`Delete examen with ID: ${id}`);
+    // Implémentez la fonctionnalité de suppression
+    console.log(`Supprimer l'examen avec l'ID : ${id}`);
   };
 
   const handleEdit = (id) => {
-    // Implement the edit functionality
-    console.log(`Edit examen with ID: ${id}`);
+    // Implémentez la fonctionnalité de modification
+    console.log(`Modifier l'examen avec l'ID : ${id}`);
   };
 
   const handleAdd = () => {
-    // Implement the add session functionality
-    console.log('Add new examen');
+    // Implémentez la fonctionnalité d'ajout d'un examen
+    console.log('Ajouter un nouvel examen');
   };
 
-  // Function to get session name by ID
+  // Fonction pour obtenir le nom de la session par ID
   const getSessionNameById = (id) => {
     const session = sessions.find(session => session.id_session === id);
-    return session ? session.nom_session : 'Unknown';
+    return session ? session.nom_session : 'Inconnu';
   };
 
-  // Function to get module name by ID
+  // Fonction pour obtenir le nom du module par ID
   const getModuleNameById = (id) => {
     const module = modules.find(module => module.id_module === id);
-    return module ? module.nom_module : 'Unknown';
+    return module ? module.nom_module : 'Inconnu';
   };
 
   return (
@@ -79,19 +110,33 @@ const ExamenList = () => {
             Liste des examens
           </CardTitle>
           <CardBody>
+            <FormGroup className="mb-3">
+              <Input
+                type="text"
+                placeholder="Rechercher par examen"
+                value={searchQuery}
+                onChange={handleSearchChange}
+              />
+            </FormGroup>
+            <div className="mb-3">
+              <Button color="secondary" onClick={() => handleSort('nom_examen')}>
+                Nom {sortField === 'nom_examen' && (sortOrder === 'asc' ? <FaSortAlphaUp /> : <FaSortAlphaDown />)}
+              </Button>
+            </div>
             <Table className="modern-table" responsive>
               <thead>
                 <tr>
-                  <th>Nom d'examen</th>
+                  <th>Nom de l'examen</th>
                   <th>Date</th>
                   <th>Durée</th>
                   <th>Type</th>
                   <th>Session</th>
                   <th>Module</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {examen.map(examen => (
+                {filteredExamens.map(examen => (
                   <tr key={examen.id_examen}>
                     <td>{examen.nom_examen}</td>
                     <td>{examen.date_examen}</td>

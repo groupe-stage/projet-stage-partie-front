@@ -1,43 +1,66 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useParams, Link} from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Row, Col, Card, CardTitle, CardBody, Form, FormGroup, Label, Input, Button } from 'reactstrap';
-import { useNavigate } from 'react-router-dom';
+
+// Configuration par défaut d'axios pour les requêtes CSRF
+axios.defaults.xsrfCookieName = 'csrftoken';
+axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+axios.defaults.withCredentials = true;
+
+// Fonction utilitaire pour récupérer le token CSRF depuis les cookies
+const getCookie = (name) => {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+};
 
 const UpdateUser = () => {
   const [userData, setUserData] = useState({
-    cin: '',
-    contrainte: '',
+    username: '',
     email: '',
-    id_surveillance: '',
-    id_unite: '',
-    id_user: '',
-    identifiant: '',
-    mdp: '',
-    nom_user: '',
-    prenom_user: '',
+    password: '',
+    cin: '',
     role: '',
+    id_surveillance: '',
+    identifiant: '',
     roleRes: '',
+    id_unite: '',
     image_user: '',
   });
 
   const [message, setMessage] = useState('');
-  const { id_user } = useParams();
-  const navigate = useNavigate();  // Déclaration correcte
-  useEffect(() => {
-    const fetchUser = async () => {
+  
+  
+  const navigate = useNavigate(); 
+
+  console.log(window.location.pathname); // Check the full URL path
+const { user_id } = useParams();
+console.log('user_id from URL:', user_id);
+
+useEffect(() => {
+  const fetchUser = async () => {
+    if (user_id) { // Ensure user_id is available
       try {
-        console.log(`Fetching user with ID: ${id_user}`);
-        const response = await axios.get(`http://localhost:8000/users/updateusers/${id_user}/`);
-        console.log('User data fetched:', response.data);
+        const response = await axios.get(`http://127.0.0.1:8000/api/updateusers/${user_id}/`);
         setUserData(response.data);
       } catch (error) {
         console.error('Erreur lors de la récupération des données utilisateur:', error);
       }
-    };
+    }
+  };
 
-    fetchUser();
-  }, [id_user]);
+  fetchUser();
+}, [user_id]);
 
   const handleChange = (e) => {
     setUserData({
@@ -64,12 +87,13 @@ const UpdateUser = () => {
         formData.append(key, userData[key]);
       }
     }
-  
+    const csrftoken = getCookie('csrftoken');  // Récupération dynamique du token CSRF
+
     try {
-      await axios.put(`http://localhost:8000/users/updateusers/${id_user}/`, formData, {
+      await axios.put(`http://127.0.0.1:8000/api/updateusers/${user_id}/`, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+          'X-CSRFToken': csrftoken
+        }
       });
       setMessage('Utilisateur mis à jour avec succès!');
       navigate('/user-list'); 
@@ -99,15 +123,7 @@ const UpdateUser = () => {
                   required
                 />
               </FormGroup>
-              <FormGroup>
-                <Label for="contrainte">Contrainte</Label>
-                <Input
-                  id="contrainte"
-                  name="contrainte"
-                  value={userData.contrainte}
-                  onChange={handleChange}
-                />
-              </FormGroup>
+             
               <FormGroup>
                 <Label for="email">Email</Label>
                 <Input
@@ -119,37 +135,18 @@ const UpdateUser = () => {
                   required
                 />
               </FormGroup>
+              
               <FormGroup>
-                <Label for="mdp">Mot de passe</Label>
+                <Label for="username">Nom</Label>
                 <Input
-                  id="mdp"
-                  name="mdp"
-                  type="password"
-                  value={userData.mdp}
+                  id="username"
+                  name="username"
+                  value={userData.username}
                   onChange={handleChange}
                   required
                 />
               </FormGroup>
-              <FormGroup>
-                <Label for="nom_user">Nom</Label>
-                <Input
-                  id="nom_user"
-                  name="nom_user"
-                  value={userData.nom_user}
-                  onChange={handleChange}
-                  required
-                />
-              </FormGroup>
-              <FormGroup>
-                <Label for="prenom_user">Prénom</Label>
-                <Input
-                  id="prenom_user"
-                  name="prenom_user"
-                  value={userData.prenom_user}
-                  onChange={handleChange}
-                  required
-                />
-              </FormGroup>
+              
               <FormGroup>
                 <Label for="identifiant">Identifiant</Label>
                 <Input

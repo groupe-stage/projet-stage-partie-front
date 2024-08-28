@@ -123,7 +123,7 @@ const Header = () => {
             ></img>
           </DropdownToggle>
           <DropdownMenu>
-            <DropdownItem header>{currentUser ? `Hello, ${currentUser.user.username}` : 'Guest'}</DropdownItem>
+            <DropdownItem header>{currentUser ? `Salut, ${currentUser.user.username}` : 'Guest'}</DropdownItem>
             <DropdownItem>Mon Compte</DropdownItem>
             <DropdownItem>Modifier Profile</DropdownItem>
             <DropdownItem divider />

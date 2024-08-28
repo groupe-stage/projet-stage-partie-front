@@ -49,7 +49,7 @@ const ContrainteUpdate = lazy(() => import("../components/Contrainte/UpdateContr
 const AddDepartement = lazy(() => import("../components/Departement/addDep.js"));
 const DepartementList = lazy(() => import("../components/Departement/DepartementList.js"));
 const DepUpdate = lazy(() => import("../components/Departement/UpdateDep.js"));
-const DeleteDep = lazy(() => import("../components/Departement/DeleteDep.js"));
+//const DeleteDep = lazy(() => import("../components/Departement/DeleteDep.js"));
 
 const AddUnite = lazy(() => import("../components/Unité/AddUnite.js"));
 const UniteList = lazy(() => import("../components/Unité/UniteList.js"));
@@ -95,8 +95,8 @@ const ThemeRoutes = [
      
       { path: "/addUser", element: <AddUser /> },
       { path: "/user-list", exact: true, element:<UserList /> }, // Ajouter la route ici
-      { path: "/user-up/:id_user", exact: true, element:< UserUpdate/> }, // Ajouter la route ici
-      { path: "/user-del/:id_user", exact: true, element:< UserDelete/> }, // Ajouter la route ici
+      { path: "/user-up/:user_id", element: <UserUpdate /> },
+      { path: "/user-del/:user_id", exact: true, element:< UserDelete/> }, // Ajouter la route ici
       
 
       { path: "/session-list", exact: true, element:<SessionList /> }, // Ajouter la route ici

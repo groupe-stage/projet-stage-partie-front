@@ -7,6 +7,7 @@ axios.defaults.xsrfCookieName = 'csrftoken';
 axios.defaults.xsrfHeaderName = 'X-CSRFToken';
 axios.defaults.withCredentials = true;
 
+// Fonction pour obtenir un cookie spécifique par son nom
 const getCookie = (name) => {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -28,6 +29,7 @@ const AddSession = () => {
         type_session: '',
     });
 
+    // Gérer les changements dans le formulaire
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({
@@ -37,18 +39,20 @@ const AddSession = () => {
     };
 
     const navigate = useNavigate();
+
+    // Soumettre le formulaire
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        const csrftoken = getCookie('csrftoken');  // Dynamically extract CSRF token
+        const csrftoken = getCookie('csrftoken');  // Extraire dynamiquement le token CSRF
 
         axios.post('http://127.0.0.1:8000/session/addSession/', formData, {
             headers: {
-                'X-CSRFToken': csrftoken  // Include CSRF token in the headers
+                'X-CSRFToken': csrftoken  // Inclure le token CSRF dans les en-têtes
             }
         })
         .then(response => {
-            alert('Session added successfully!');
+            alert('Session ajoutée avec succès!');
             navigate('/session-list');
             setFormData({
                 nom_session: '',
@@ -56,8 +60,8 @@ const AddSession = () => {
             });
         })
         .catch(error => {
-            console.error('There was an error adding the session!', error);
-            alert('Error adding session.');
+            console.error('Erreur lors de l\'ajout de la session!', error);
+            alert('Erreur lors de l\'ajout de la session.');
         });
     };
 
@@ -82,7 +86,7 @@ const AddSession = () => {
                                 />
                             </FormGroup>
                             <FormGroup>
-                                <Label for="type_session">Type d'une session</Label>
+                                <Label for="type_session">Type de la session</Label>
                                 <Input
                                     id="type_session"
                                     name="type_session"
@@ -91,7 +95,7 @@ const AddSession = () => {
                                     type="select"
                                     required
                                 >
-                                    <option value="">Sélectionnez type de session</option>
+                                    <option value="">Sélectionnez le type de session</option>
                                     <option value="principale">Principale</option>
                                     <option value="ratrapage">Rattrapage</option>
                                     <option value="decembre">Décembre</option>

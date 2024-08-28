@@ -7,31 +7,37 @@ import { Link } from 'react-router-dom';
 
 const UserList = () => {
   const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get('http://127.0.0.1:8000/users/displayall/')
+    axios.get('http://127.0.0.1:8000/api/displayall')
       .then(response => {
         setUsers(response.data);
+        setLoading(false);
       })
       .catch(error => {
         console.error("Il y a eu une erreur!", error);
+        setLoading(false);
       });
   }, []);
 
   const handleDelete = (id) => {
-    // Implement the delete functionality
-    console.log(`Delete user with ID: ${id}`);
+    // Implémentez la fonctionnalité de suppression
+    console.log(`Supprimer l'utilisateur avec l'ID : ${id}`);
   };
 
-  const handleEdit = (id) => {
-    // Implement the edit functionality
-    console.log(`Edit user with ID: ${id}`);
-  };
+  
+
+ 
 
   const handleAdd = () => {
-    // Implement the add user functionality
     console.log('Add new user');
+    // Implement add functionality, e.g., navigating to an add user form
   };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <Row>
@@ -39,54 +45,50 @@ const UserList = () => {
         <Card>
           <CardTitle tag="h6" className="border-bottom p-3 mb-0">
             <i className="bi bi-card-text me-2"> </i>
-            Liste des utilisateurs 
+            Liste des utilisateurs
           </CardTitle>
           <CardBody>
             <Table className="modern-table" responsive>
               <thead>
                 <tr>
-                 
                   <th>Image</th>
                   <th>Nom</th>
-                  <th>Prénom</th>
                   <th>Email</th>
-                  <th>Mot de passe</th>
                   <th>CIN</th>
                   <th>Role</th>
-                  <th>Role Enseignant</th>   
+                  <th>Role Enseignant</th>
                   <th>Identifiant</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {users.map(user => (
-                  <tr key={user.id_user}>
-                  
+                  <tr key={user.user_id}>
                     <td>
                     <img 
-                        src={`http://localhost:8000${user.image_user}`} 
+                        src={`http://127.0.0.1:8000${user.image_user}`} 
                         className="user-image"
                       />
+
                     </td>
-                    <td>{user.nom_user}</td>
-                    <td>{user.prenom_user}</td>
+                    <td>{user.username}</td>
                     <td>{user.email}</td>
-                    <td>{user.mdp}</td>
                     <td>{user.cin}</td>
                     <td>{user.role}</td>
                     <td>{user.roleRes}</td>
                     <td>{user.identifiant}</td>
                     <td>
                       <ButtonGroup>
-                      <Link to={`/user-up/${user.id_user}`}>
-                        <Button color="secondary" onClick={() => handleEdit(user.id_user)}>
-                          <FaEdit />
-                        </Button>
+                      <Link to={`/user-up/${user.user_id}`}>
+                       <Button color="secondary">
+                        <FaEdit />
+                         </Button>
                         </Link>
-                        <Link to={`/user-del/${user.id_user}`}>
-                        <Button color="dark" onClick={() => handleDelete(user.id_user)}>
-                          <FaTrashAlt />
-                        </Button>
+
+                        <Link to={`/user-del/${user.user_id}`}>
+                          <Button color="dark" onClick={() => handleDelete(user.user_id)}>
+                            <FaTrashAlt />
+                          </Button>
                         </Link>
                       </ButtonGroup>
                     </td>
@@ -95,11 +97,10 @@ const UserList = () => {
               </tbody>
             </Table>
             <div className="text-center mt-3">
-               
-                <Link to="/addUser">
-              <Button color="secondary" onClick={handleAdd}>
-                <FaPlus /> Ajouter un utilisateur
-              </Button>
+              <Link to="/addUser">
+                <Button color="secondary" onClick={handleAdd}>
+                  <FaPlus /> Ajouter un utilisateur
+                </Button>
               </Link>
             </div>
           </CardBody>

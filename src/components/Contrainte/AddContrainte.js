@@ -38,7 +38,7 @@ const AddContrainte = () => {
 
     useEffect(() => {
         // Fetch users data
-        axios.get('http://127.0.0.1:8000/')  // Adjust the endpoint as needed
+        axios.get('http://127.0.0.1:8000/api/displayall')  // Adjust the endpoint as needed
             .then(response => {
                 setUsers(response.data);
             })
@@ -156,8 +156,8 @@ const AddContrainte = () => {
                                 >
                                     <option value="">Sélectionnez un utilisateur</option>
                                     {users.map(user => (
-                                        <option key={user.id_user} value={user.id_user}>
-                                            {user.username}
+                                        <option key={user.id} value={user.id}>
+                                            {user.user_id}
                                         </option>
                                     ))}
                                 </Input>

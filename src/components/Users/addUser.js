@@ -13,13 +13,29 @@ import {
   Label,
   Input
 } from 'reactstrap';
-
+axios.defaults.xsrfCookieName = 'csrftoken';
+axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+axios.defaults.withCredentials = true;
+const getCookie = (name) => {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+};
 const AddUser = () => {
+
     const [formData, setFormData] = useState({
-        nom_user: '',
-        prenom_user: '',
+        username: '',
         email: '',
-        mdp: '',
+        password: '',
         cin: '',
         role: '',
         id_surveillance: '',
@@ -55,27 +71,28 @@ const AddUser = () => {
         if (formData.role === 'employe') {
             dataToSend.set('roleRes', '');
         }
+        const csrftoken = getCookie('csrftoken');  // Dynamically extract CSRF token
 
-        axios.post('http://127.0.0.1:8000/users/addUser/', dataToSend, {
+        axios.post('http://127.0.0.1:8000/api/register', dataToSend, {
             headers: {
-                'Content-Type': 'multipart/form-data'
+                'X-CSRFToken': csrftoken
             }
         })
+        
         .then(response => {
             alert('User added successfully!');
             navigate('/user-list'); 
             setFormData({
-                nom_user: '',
-                prenom_user: '',
-                email: '',
-                mdp: '',
-                cin: '',
-                role: '',
-                id_surveillance: '',
-                identifiant: '',
-                roleRes: '',
-                id_unite: '',
-                image_user: null,
+                username: '',
+        email: '',
+        password: '',
+        cin: '',
+        role: '',
+        id_surveillance: '',
+        identifiant: '',
+        roleRes: '',
+        id_unite: '',
+        image_user: null,
             });
         })
         .catch(error => {
@@ -95,25 +112,16 @@ const AddUser = () => {
                     <CardBody>
                         <Form onSubmit={handleSubmit}>
                             <FormGroup>
-                                <Label for="nom_user">Nom</Label>
+                                <Label for="username">Nom</Label>
                                 <Input
-                                    id="nom_user"
-                                    name="nom_user"
-                                    value={formData.nom_user}
+                                    id="username"
+                                    name="username"
+                                    value={formData.username}
                                     onChange={handleChange}
                                     required
                                 />
                             </FormGroup>
-                            <FormGroup>
-                                <Label for="prenom_user">Prénom</Label>
-                                <Input
-                                    id="prenom_user"
-                                    name="prenom_user"
-                                    value={formData.prenom_user}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </FormGroup>
+                           
                             <FormGroup>
                                 <Label for="email">Email</Label>
                                 <Input
@@ -126,11 +134,11 @@ const AddUser = () => {
                                 />
                             </FormGroup>
                             <FormGroup>
-                                <Label for="mdp">Mot de passe</Label>
+                                <Label for="password">Mot de passe</Label>
                                 <Input
-                                    id="mdp"
-                                    name="mdp"
-                                    value={formData.mdp}
+                                    id="password"
+                                    name="password"
+                                    value={formData.password}
                                     onChange={handleChange}
                                     type="password"
                                     required
@@ -220,6 +228,7 @@ const AddUser = () => {
                                     placeholder="Entrez l'ID de l'unité"
                                     required
                                 />
+                                
                             </FormGroup>
                             
                             <Button type="submit">Ajouter l'utilisateur</Button>

@@ -1,16 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Row, Col, Table, Card, CardTitle, CardBody, Button, ButtonGroup } from 'reactstrap';
-import { FaEdit, FaTrashAlt, FaPlus } from 'react-icons/fa';
-import './ModuleList.css'; // Ensure to include your CSS file
+import { Row, Col, Table, Card, CardTitle, CardBody, Button, ButtonGroup, FormGroup, Input } from 'reactstrap';
+import { FaEdit, FaTrashAlt, FaPlus, FaSortAlphaDown, FaSortAlphaUp } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+
+import './ModuleList.css'; // Assurez-vous d'inclure votre fichier CSS
 
 const ModuleList = () => {
   const [modules, setModules] = useState([]);
   const [niveaux, setNiveaux] = useState([]);
+  const [filteredModules, setFilteredModules] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortField, setSortField] = useState('');
+  const [sortOrder, setSortOrder] = useState('asc'); // 'asc' ou 'desc'
 
   useEffect(() => {
-    // Fetch all modules
+    // Récupérer tous les modules
     axios.get('http://127.0.0.1:8000/module/displayall/')
       .then(response => {
         setModules(response.data);
@@ -19,7 +24,7 @@ const ModuleList = () => {
         console.error("Il y a eu une erreur lors de la récupération des modules!", error);
       });
 
-    // Fetch all niveaux
+    // Récupérer tous les niveaux
     axios.get('http://127.0.0.1:8000/Niveau/displayallNiveaux/')
       .then(response => {
         setNiveaux(response.data);
@@ -29,22 +34,50 @@ const ModuleList = () => {
       });
   }, []);
 
+  useEffect(() => {
+    // Filtrer les modules en fonction de la recherche
+    const filtered = modules.filter(module =>
+      module.nom_module.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    // Trier les modules filtrés en fonction du champ et de l'ordre
+    const sorted = filtered.sort((a, b) => {
+      if (sortField) {
+        if (a[sortField] < b[sortField]) return sortOrder === 'asc' ? -1 : 1;
+        if (a[sortField] > b[sortField]) return sortOrder === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+
+    setFilteredModules(sorted);
+  }, [modules, searchQuery, sortField, sortOrder]);
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const handleSort = (field) => {
+    const newOrder = (sortField === field && sortOrder === 'asc') ? 'desc' : 'asc';
+    setSortField(field);
+    setSortOrder(newOrder);
+  };
+
   const handleDelete = (id) => {
-    // Implement the delete functionality
-    console.log(`Delete module with ID: ${id}`);
+    // Implémenter la fonctionnalité de suppression
+    console.log(`Supprimer le module avec ID: ${id}`);
   };
 
   const handleEdit = (id) => {
-    // Implement the edit functionality
-    console.log(`Edit module with ID: ${id}`);
+    // Implémenter la fonctionnalité de modification
+    console.log(`Modifier le module avec ID: ${id}`);
   };
 
   const handleAdd = () => {
-    // Implement the add session functionality
-    console.log('Add new module');
+    // Implémenter la fonctionnalité d'ajout
+    console.log('Ajouter un nouveau module');
   };
 
-  // Function to get the libelleNiv based on id_niveau
+  // Fonction pour obtenir le libelleNiv basé sur id_niveau
   const getLibelleNiv = (id) => {
     const niveau = niveaux.find(niveau => niveau.id_niveau === id);
     return niveau ? niveau.libelleNiv : 'Inconnu';
@@ -59,6 +92,19 @@ const ModuleList = () => {
             Liste des modules
           </CardTitle>
           <CardBody>
+            <FormGroup className="mb-3">
+              <Input
+                type="text"
+                placeholder="Rechercher par module"
+                value={searchQuery}
+                onChange={handleSearchChange}
+              />
+            </FormGroup>
+            <div className="mb-3">
+              <Button color="secondary" onClick={() => handleSort('nom_module')}>
+                Module {sortField === 'nom_module' && (sortOrder === 'asc' ? <FaSortAlphaUp /> : <FaSortAlphaDown />)}
+              </Button>
+            </div>
             <Table className="modern-table" responsive>
               <thead>
                 <tr>
@@ -69,7 +115,7 @@ const ModuleList = () => {
                 </tr>
               </thead>
               <tbody>
-                {modules.map(module => (
+                {filteredModules.map(module => (
                   <tr key={module.id_module}>
                     <td>{module.nom_module}</td>
                     <td>{module.duree_module}</td>

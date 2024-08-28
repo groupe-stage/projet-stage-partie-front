@@ -47,13 +47,8 @@ const UpdateModule = () => {
 
     const fetchNiveaux = async () => {
       try {
-        const csrftoken = getCookie('csrftoken');
 
-        const response = await axios.get('http://127.0.0.1:8000/Niveau/displayallNiveaux/', {
-          headers: {
-            'X-CSRFToken': csrftoken  // Include CSRF token in the headers
-          }
-        }); // URL pour récupérer les niveaux
+        const response = await axios.get('http://127.0.0.1:8000/Niveau/displayallNiveaux/'); // URL pour récupérer les niveaux
         setNiveaux(response.data);
       } catch (error) {
         console.error('Erreur lors de la récupération des niveaux:', error);
@@ -84,10 +79,12 @@ const UpdateModule = () => {
     }
 
     try {
+      const csrftoken = getCookie('csrftoken');
+
       await axios.put(`http://127.0.0.1:8000/module/updateModule/${id_module}/`, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+          'X-CSRFToken': csrftoken  // Include CSRF token in the headers
+        }
       });
       setMessage('Module mis à jour avec succès!');
       navigate('/module-list');
@@ -139,8 +136,8 @@ const UpdateModule = () => {
                 >
                   <option value="">Sélectionnez un niveau</option>
                   {niveaux.map(niveau => (
-                    <option key={niveau.id_niveau} value={niveau.id_niveau}>
-                      {niveau.libelleNiv}
+                    <option key={niveau.id} value={niveau.id}>
+                      {niveau.id_niveau}
                     </option>
                   ))}
                 </Input>
