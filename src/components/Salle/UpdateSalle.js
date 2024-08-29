@@ -33,7 +33,6 @@ const EditSalle = () => {
   });
   
   const [blocs, setBlocs] = useState([]);
-  const [examens, setExamens] = useState([]); // Assuming you want to list exams too
 
   useEffect(() => {
     // Fetch salle data
@@ -54,14 +53,7 @@ const EditSalle = () => {
         console.error("Erreur lors de la récupération des blocs!", error);
       });
 
-    // Fetch examens data
-    axios.get('http://127.0.0.1:8000/examen/displayall/') // Assuming you have a similar endpoint for exams
-      .then(response => {
-        setExamens(response.data);
-      })
-      .catch(error => {
-        console.error("Erreur lors de la récupération des examens!", error);
-      });
+   
   }, [id_salle]);
 
   const handleChange = (e) => {
@@ -146,24 +138,7 @@ const EditSalle = () => {
               ))}
             </Input>
           </FormGroup>
-          <FormGroup>
-            <Label for="id_examen">Examen</Label>
-            <Input
-              id="id_examen"
-              name="id_examen"
-              type="select"
-              value={salleData.id_examen}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Sélectionnez un examen</option>
-              {examens.map(examen => (
-                <option key={examen.id_examen} value={examen.id_examen}>
-                  {examen.nom_examen}
-                </option>
-              ))}
-            </Input>
-          </FormGroup>
+         
           <Button type="submit" color="primary">Modifier la salle</Button>
         </Form>
       </Col>

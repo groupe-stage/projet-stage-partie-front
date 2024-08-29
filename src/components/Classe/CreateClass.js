@@ -13,29 +13,32 @@ import {
   Label,
   Input
 } from 'reactstrap';
+
 axios.defaults.xsrfCookieName = 'csrftoken';
 axios.defaults.xsrfHeaderName = 'X-CSRFToken';
 axios.defaults.withCredentials = true;
 
 const getCookie = (name) => {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
     }
-    return cookieValue;
+  }
+  return cookieValue;
 };
+
 const AddClass = () => {
   const [formData, setFormData] = useState({
     NbEtudiantClasse: '',
     id_niveau: '',
-    libelleClasse: ''
+    startingLibelleClasse: '',
+    numberOfClasses: 1
   });
 
   const [niveaux, setNiveaux] = useState([]);
@@ -63,26 +66,41 @@ const AddClass = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const csrftoken = getCookie('csrftoken');  // Dynamically extract CSRF token
+    const csrftoken = getCookie('csrftoken'); // Extract CSRF token
+    const classes = [];
 
-    axios.post('http://127.0.0.1:8000/Classe/addClasse/', formData,{
-      headers: {
-          'X-CSRFToken': csrftoken  // Include CSRF token in the headers
-      }
-  })
-      .then(response => {
-        alert('Classe added successfully!');
-        navigate('/ClasseList');
-        setFormData({
-          NbEtudiantClasse: '',
-          id_niveau: '',
-          libelleClasse: ''
-        });
-      })
-      .catch(error => {
-        console.error('There was an error adding the class!', error);
-        alert('Error adding class.');
+    for (let i = 0; i < formData.numberOfClasses; i++) {
+      classes.push({
+        NbEtudiantClasse: formData.NbEtudiantClasse,
+        id_niveau: formData.id_niveau,
+        libelleClasse: `${parseInt(formData.startingLibelleClasse) + i}`
       });
+    }
+
+    // Use Promise.all to send multiple requests
+    Promise.all(
+      classes.map(cls => 
+        axios.post('http://127.0.0.1:8000/Classe/addClasse/', cls, {
+          headers: {
+            'X-CSRFToken': csrftoken  // Include CSRF token in the headers
+          }
+        })
+      )
+    )
+    .then(() => {
+      alert('Classes added successfully!');
+      navigate('/ClasseList');
+      setFormData({
+        NbEtudiantClasse: '',
+        id_niveau: '',
+        startingLibelleClasse: '',
+        numberOfClasses: 1
+      });
+    })
+    .catch(error => {
+      console.error('There was an error adding the classes!', error);
+      alert('Error adding classes.');
+    });
   };
 
   return (
@@ -91,7 +109,7 @@ const AddClass = () => {
         <Card>
           <CardTitle tag="h6" className="border-bottom p-3 mb-0">
             <i className="bi bi-bell me-2"> </i>
-            Ajouter une Classe
+            Ajouter des Classes
           </CardTitle>
           <CardBody>
             <Form onSubmit={handleSubmit}>
@@ -125,17 +143,29 @@ const AddClass = () => {
                 </Input>
               </FormGroup>
               <FormGroup>
-                <Label for="libelleClasse">Libellé Classe</Label>
+                <Label for="startingLibelleClasse">Libellé Classe de départ</Label>
                 <Input
-                  id="libelleClasse"
-                  name="libelleClasse"
-                  type="text"
-                  value={formData.libelleClasse}
+                  id="startingLibelleClasse"
+                  name="startingLibelleClasse"
+                  type="number"
+                  value={formData.startingLibelleClasse}
                   onChange={handleChange}
                   required
                 />
               </FormGroup>
-              <Button type="submit">Ajouter la Classe</Button>
+              <FormGroup>
+                <Label for="numberOfClasses">Nombre de Classes à ajouter</Label>
+                <Input
+                  id="numberOfClasses"
+                  name="numberOfClasses"
+                  type="number"
+                  value={formData.numberOfClasses}
+                  onChange={handleChange}
+                  min="1"
+                  required
+                />
+              </FormGroup>
+              <Button type="submit">Ajouter les Classes</Button>
             </Form>
           </CardBody>
         </Card>

@@ -30,11 +30,10 @@ const UpdateUser = () => {
     email: '',
     password: '',
     cin: '',
-    role: '',
-    id_surveillance: '',
+    quota: '',
+    role: '',   
     identifiant: '',
     roleRes: '',
-    id_unite: '',
     image_user: '',
   });
 
@@ -52,6 +51,8 @@ useEffect(() => {
     if (user_id) { // Ensure user_id is available
       try {
         const response = await axios.get(`http://127.0.0.1:8000/api/updateusers/${user_id}/`);
+        console.log('Données utilisateur récupérées:', response.data); // Affiche les données récupérées
+
         setUserData(response.data);
       } catch (error) {
         console.error('Erreur lors de la récupération des données utilisateur:', error);
@@ -80,13 +81,16 @@ useEffect(() => {
     e.preventDefault();
   
     const formData = new FormData();
-    for (const key in userData) {
-      if (userData[key] instanceof File) {
-        formData.append(key, userData[key]);
-      } else {
-        formData.append(key, userData[key]);
-      }
+   // Append form data, setting fields to null if empty
+   for (const key in userData) {
+    if (userData[key] instanceof File) {
+      formData.append(key, userData[key]);
+    } else if (userData[key] === '') {
+      formData.append(key, null); // Set to null if the value is an empty string
+    } else {
+      formData.append(key, userData[key]);
     }
+  }
     const csrftoken = getCookie('csrftoken');  // Récupération dynamique du token CSRF
 
     try {
@@ -119,6 +123,16 @@ useEffect(() => {
                   id="cin"
                   name="cin"
                   value={userData.cin}
+                  onChange={handleChange}
+                  required
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label for="quota">Quota</Label>
+                <Input
+                  id="quota"
+                  name="quota"
+                  value={userData.quota}
                   onChange={handleChange}
                   required
                 />
@@ -200,28 +214,7 @@ useEffect(() => {
                   <option value="simple">Enseignant</option>
                 </Input>
               </FormGroup>
-              <FormGroup>
-                <Label for="id_surveillance">Surveillance</Label>
-                <Input
-                  id="id_surveillance"
-                  name="id_surveillance"
-                  value={userData.id_surveillance}
-                  onChange={handleChange}
-                  placeholder="Entrez l'ID de surveillance"
-                  required
-                />
-              </FormGroup>
-              <FormGroup>
-                <Label for="id_unite">Unité</Label>
-                <Input
-                  id="id_unite"
-                  name="id_unite"
-                  value={userData.id_unite}
-                  onChange={handleChange}
-                  placeholder="Entrez l'ID de l'unité"
-                  required
-                />
-              </FormGroup>
+              
               <Button type="submit">Mettre à jour l'utilisateur</Button>
             </Form>
           </CardBody>

@@ -37,11 +37,10 @@ const AddUser = () => {
         email: '',
         password: '',
         cin: '',
+        quota: '',
         role: '',
-        id_surveillance: '',
         identifiant: '',
-        roleRes: '',
-        id_unite: '',
+        roleRes: '',      
         image_user: null,
     });
 
@@ -87,11 +86,10 @@ const AddUser = () => {
         email: '',
         password: '',
         cin: '',
-        role: '',
-        id_surveillance: '',
+        quota: '',
+        role: '',     
         identifiant: '',
         roleRes: '',
-        id_unite: '',
         image_user: null,
             });
         })
@@ -155,6 +153,16 @@ const AddUser = () => {
                                 />
                             </FormGroup>
                             <FormGroup>
+                                <Label for="quota">Quota</Label>
+                                <Input
+                                    id="quota"
+                                    name="quota"
+                                    value={formData.quota}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </FormGroup>
+                            <FormGroup>
                                 <Label for="identifiant">Identifiant</Label>
                                 <Input
                                     id="identifiant"
@@ -207,29 +215,8 @@ const AddUser = () => {
                                     <option value="simple">Enseignant</option>
                                 </Input>
                             </FormGroup>
-                            <FormGroup>
-                                <Label for="id_surveillance">Surveillance</Label>
-                                <Input
-                                    id="id_surveillance"
-                                    name="id_surveillance"
-                                    value={formData.id_surveillance}
-                                    onChange={handleChange}
-                                    placeholder="Entrez l'ID de surveillance"
-                                    required
-                                />
-                            </FormGroup> 
-                            <FormGroup>
-                                <Label for="id_unite">Unité</Label>
-                                <Input
-                                    id="id_unite"
-                                    name="id_unite"
-                                    value={formData.id_unite}
-                                    onChange={handleChange}
-                                    placeholder="Entrez l'ID de l'unité"
-                                    required
-                                />
-                                
-                            </FormGroup>
+                            
+                            
                             
                             <Button type="submit">Ajouter l'utilisateur</Button>
                         </Form>

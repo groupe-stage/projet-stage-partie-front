@@ -25,12 +25,10 @@ const AddSalle = () => {
     nom_salle: '',
     capacite: '',
     dispo: true,
-    id_bloc: '',
-    id_examen: ''
+    id_bloc: ''
   });
 
   const [blocs, setBlocs] = useState([]);
-  const [examens, setExamens] = useState([]); // Assuming you want to list exams too
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -42,13 +40,7 @@ const AddSalle = () => {
         console.error("Il y a eu une erreur!", error);
       });
 
-    axios.get('http://127.0.0.1:8000/examen/displayall/') // Assuming you have a similar endpoint for exams
-      .then(response => {
-        setExamens(response.data);
-      })
-      .catch(error => {
-        console.error("Il y a eu une erreur!", error);
-      });
+    
   }, []);
 
   const handleChange = (e) => {
@@ -133,24 +125,7 @@ const AddSalle = () => {
               ))}
             </Input>
           </FormGroup>
-          <FormGroup>
-            <Label for="id_examen">Examen</Label>
-            <Input
-              id="id_examen"
-              name="id_examen"
-              type="select"
-              value={salleData.id_examen}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Sélectionnez un examen</option>
-              {examens.map(examen => (
-                <option key={examen.id_examen} value={examen.id_examen}>
-                  {examen.nom_examen}
-                </option>
-              ))}
-            </Input>
-          </FormGroup>
+          
           <Button type="submit" color="primary">Ajouter une salle</Button>
         </Form>
       </Col>

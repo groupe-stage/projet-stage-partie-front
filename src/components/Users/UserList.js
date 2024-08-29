@@ -58,6 +58,7 @@ const UserList = () => {
                   <th>Role</th>
                   <th>Role Enseignant</th>
                   <th>Identifiant</th>
+                  <th>Quota</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -68,6 +69,7 @@ const UserList = () => {
                     <img 
                         src={`http://127.0.0.1:8000${user.image_user}`} 
                         className="user-image"
+                        alt=''
                       />
 
                     </td>
@@ -77,6 +79,7 @@ const UserList = () => {
                     <td>{user.role}</td>
                     <td>{user.roleRes}</td>
                     <td>{user.identifiant}</td>
+                    <td>{user.quota}</td>
                     <td>
                       <ButtonGroup>
                       <Link to={`/user-up/${user.user_id}`}>

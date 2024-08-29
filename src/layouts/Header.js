@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom"; 
 import {
   Navbar,
   Collapse,
@@ -21,17 +21,15 @@ axios.defaults.xsrfCookieName = 'csrftoken';
 axios.defaults.xsrfHeaderName = 'X-CSRFToken';
 axios.defaults.withCredentials = true;
 
-
-
 const client = axios.create({
   baseURL: "http://127.0.0.1:8000"
 });
 
 const Header = () => {
-  const [currentUser, setCurrentUser] = useState(null); // Store user info
+  const [currentUser, setCurrentUser] = useState(null); 
   const [isOpen, setIsOpen] = React.useState(false);
   const [dropdownOpen, setDropdownOpen] = React.useState(false);
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate(); 
   const toggle = () => setDropdownOpen((prevState) => !prevState);
   const Handletoggle = () => {
     setIsOpen(!isOpen);
@@ -43,28 +41,46 @@ const Header = () => {
   useEffect(() => {
     client.get("/api/user")
       .then(function (res) {
-        console.log("User data:", res.data); // Log response to check structure
-        setCurrentUser(res.data); // Adjust if necessary based on actual response structure
+        console.log("User data:", res.data); 
+        setCurrentUser(res.data.user); 
       })
       .catch(function (error) {
         console.error("Error fetching user info:", error.response ? error.response.data : error.message);
         setCurrentUser(null);
       });
   }, []);
-  
 
+  useEffect(() => {
+    const handleTabClose = (event) => {
+      client.post("/api/logout", {})
+        .then(function (res) {
+          setCurrentUser(null);
+        }).catch(error => {
+          console.error("Logout error:", error);
+        });
+
+      // Optionally, show a confirmation dialog (this line is commented out as it's often not necessary):
+      // event.returnValue = 'Are you sure you want to leave?';
+    };
+
+    // Add event listener
+    window.addEventListener("beforeunload", handleTabClose);
+
+    // Clean up event listener on component unmount
+    return () => {
+      window.removeEventListener("beforeunload", handleTabClose);
+    };
+  }, []);
 
   function submitLogout(e) {
     e.preventDefault();
-    client.post(
-      "/api/logout",
-      { withCredentials: true }
-    ).then(function (res) {
-      setCurrentUser(null);
-      navigate('/login'); // Redirect to the login page
-    }).catch(error => {
-      console.error("Logout error:", error);
-    });
+    client.post("/api/logout", {})
+      .then(function (res) {
+        setCurrentUser(null);
+        navigate('/login'); 
+      }).catch(error => {
+        console.error("Logout error:", error);
+      });
   }
 
   return (
@@ -102,14 +118,12 @@ const Header = () => {
       <Collapse navbar isOpen={isOpen}>
         <Nav className="me-auto" navbar>
           <UncontrolledDropdown inNavbar nav>
-            <DropdownToggle caret nav>
-              Menu
-            </DropdownToggle>
+            
             <DropdownMenu end>
-              <DropdownItem>Option 1</DropdownItem>
-              <DropdownItem>Option 2</DropdownItem>
+              <DropdownItem></DropdownItem>
+              <DropdownItem></DropdownItem>
               <DropdownItem divider />
-              <DropdownItem>Reset</DropdownItem>
+              <DropdownItem></DropdownItem>
             </DropdownMenu>
           </UncontrolledDropdown>
         </Nav>
@@ -123,7 +137,7 @@ const Header = () => {
             ></img>
           </DropdownToggle>
           <DropdownMenu>
-            <DropdownItem header>{currentUser ? `Salut, ${currentUser.user.username}` : 'Guest'}</DropdownItem>
+            <DropdownItem header>{currentUser ? `Salut, ${currentUser.username}` : 'Guest'}</DropdownItem>
             <DropdownItem>Mon Compte</DropdownItem>
             <DropdownItem>Modifier Profile</DropdownItem>
             <DropdownItem divider />

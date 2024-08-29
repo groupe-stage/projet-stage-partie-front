@@ -1,9 +1,13 @@
 import { lazy } from "react";
 import { Navigate } from "react-router-dom";
+
+
+
 //import PrivateRoute from "../components/dashboard/PrivateRoute";
 
 /****Layouts*****/
 const FullLayout = lazy(() => import("../layouts/FullLayout.js"));
+const LoadingScreenTest = lazy(() => import("../views/LoadingScreenTest.js"));
 
 /***** Pages ****/
 const Starter = lazy(() => import("../views/Starter.js"));
@@ -70,6 +74,10 @@ const BoxComponentUp = lazy(() => import("../components/Unité/BoxComponentUp.js
 const BoxComponentCl = lazy(() => import("../components/Classe/boxComponentCl.js"));
 const BoxComponentBl = lazy(() => import("../components/Bloc/boxComponentBl.js"));
 
+const NotFound = lazy(() => import("../components/NotFound.js"));
+
+
+
 /*const About = lazy(() => import("../views/About.js"));
 const Alerts = lazy(() => import("../views/ui/Alerts"));
 const Badges = lazy(() => import("../views/ui/Badges"));
@@ -95,7 +103,7 @@ const ThemeRoutes = [
      
       { path: "/addUser", element: <AddUser /> },
       { path: "/user-list", exact: true, element:<UserList /> }, // Ajouter la route ici
-      { path: "/user-up/:user_id", element: <UserUpdate /> },
+      { path: "/user-up/:user_id", exact: true, element:< UserUpdate/> }, // Ajouter la route ici
       { path: "/user-del/:user_id", exact: true, element:< UserDelete/> }, // Ajouter la route ici
       
 
@@ -151,8 +159,9 @@ const ThemeRoutes = [
       { path: "/boxComponentUp", exact: true, element:<BoxComponentUp /> }, // Ajouter la route ici
       { path: "/boxComponentBl", exact: true, element:<BoxComponentBl /> }, // Ajouter la route ici
       { path: "/boxComponentCl", exact: true, element:<BoxComponentCl /> }, // Ajouter la route ici
-
-
+      { path: "*", element: <NotFound /> },
+      {
+        path: "/test-loading", element: <LoadingScreenTest />, },
 
       // Uncomment these routes if needed
       // { path: "/about", element: <About /> },
