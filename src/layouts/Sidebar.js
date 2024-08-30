@@ -28,9 +28,19 @@ const navigation = [
     icon: "bi bi-buildings",
   },
   {
+    title: "Affectation des salles des examens",
+    href: "/Salle_examen-list",
+    icon: "bi bi-newspaper",
+  },
+  {
     title: "Gestion des classes",
     href: "/boxComponentCl",
     icon: "bi bi-person-video2",
+  },
+  {
+    title: "Affectation des niveaux aux modules",
+    href: "/Module_niveau-list",
+    icon: "bi bi-newspaper",
   },
   {
     title: "Gestion des surveillances",
