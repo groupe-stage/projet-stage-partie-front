@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link , useNavigate} from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
   Card,
@@ -13,9 +13,13 @@ import {
   Label,
   Input
 } from 'reactstrap';
+
+// Configuration d'Axios pour inclure le token CSRF dans les requêtes
 axios.defaults.xsrfCookieName = 'csrftoken';
 axios.defaults.xsrfHeaderName = 'X-CSRFToken';
 axios.defaults.withCredentials = true;
+
+// Fonction pour obtenir le token CSRF depuis les cookies
 const getCookie = (name) => {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -30,8 +34,9 @@ const getCookie = (name) => {
     }
     return cookieValue;
 };
-const AddUser = () => {
 
+const AddUser = () => {
+    // État du formulaire
     const [formData, setFormData] = useState({
         username: '',
         email: '',
@@ -41,9 +46,25 @@ const AddUser = () => {
         role: '',
         identifiant: '',
         roleRes: '',      
+        id_unite: '',
         image_user: null,
     });
 
+    // État pour stocker les unités récupérées de l'API
+    const [units, setUnits] = useState([]);
+
+    // useEffect pour récupérer les unités lors du montage du composant
+    useEffect(() => {
+        axios.get('http://127.0.0.1:8000/unite/unites/')  // Remplacez l'URL par celle de votre API
+            .then(response => {
+                setUnits(response.data);  // Assurez-vous que les données sont un tableau d'unités
+            })
+            .catch(error => {
+                console.error('Erreur lors de la récupération des unités!', error);
+            });
+    }, []);
+
+    // Gestion du changement des champs du formulaire
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({
@@ -52,13 +73,17 @@ const AddUser = () => {
         });
     };
 
+    // Gestion du changement du fichier image
     const handleFileChange = (e) => {
         setFormData({
             ...formData,
             image_user: e.target.files[0]
         });
     };
-    const navigate = useNavigate();  // Déclaration correcte
+
+    const navigate = useNavigate();
+
+    // Gestion de la soumission du formulaire
     const handleSubmit = (e) => {
         e.preventDefault();
 
@@ -67,35 +92,40 @@ const AddUser = () => {
             dataToSend.append(key, formData[key]);
         });
 
+        // Réinitialisation des champs spécifiques si le rôle est "employe"
         if (formData.role === 'employe') {
             dataToSend.set('roleRes', '');
+            dataToSend.set('quota', '');
+            dataToSend.set('identifiant', '');
+            dataToSend.set('id_unite', '');
         }
-        const csrftoken = getCookie('csrftoken');  // Dynamically extract CSRF token
+
+        const csrftoken = getCookie('csrftoken');
 
         axios.post('http://127.0.0.1:8000/api/register', dataToSend, {
             headers: {
                 'X-CSRFToken': csrftoken
             }
         })
-        
         .then(response => {
-            alert('User added successfully!');
+            alert('Utilisateur ajouté avec succès!');
             navigate('/user-list'); 
             setFormData({
                 username: '',
-        email: '',
-        password: '',
-        cin: '',
-        quota: '',
-        role: '',     
-        identifiant: '',
-        roleRes: '',
-        image_user: null,
+                email: '',
+                password: '',
+                cin: '',
+                quota: '',
+                role: '',     
+                identifiant: '',
+                roleRes: '',
+                id_unite: '',
+                image_user: null,
             });
         })
         .catch(error => {
-            console.error('There was an error adding the user!', error);
-            alert('Error adding user.');
+            console.error('Erreur lors de l\'ajout de l\'utilisateur!', error);
+            alert('Erreur lors de l\'ajout de l\'utilisateur.');
         });
     };
 
@@ -119,7 +149,6 @@ const AddUser = () => {
                                     required
                                 />
                             </FormGroup>
-                           
                             <FormGroup>
                                 <Label for="email">Email</Label>
                                 <Input
@@ -148,26 +177,6 @@ const AddUser = () => {
                                     id="cin"
                                     name="cin"
                                     value={formData.cin}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </FormGroup>
-                            <FormGroup>
-                                <Label for="quota">Quota</Label>
-                                <Input
-                                    id="quota"
-                                    name="quota"
-                                    value={formData.quota}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </FormGroup>
-                            <FormGroup>
-                                <Label for="identifiant">Identifiant</Label>
-                                <Input
-                                    id="identifiant"
-                                    name="identifiant"
-                                    value={formData.identifiant}
                                     onChange={handleChange}
                                     required
                                 />
@@ -215,18 +224,51 @@ const AddUser = () => {
                                     <option value="simple">Enseignant</option>
                                 </Input>
                             </FormGroup>
-                            
-                            
-                            
+                            <FormGroup>
+                                <Label for="quota">Quota</Label>
+                                <Input
+                                    id="quota"
+                                    name="quota"
+                                    value={formData.quota}
+                                    onChange={handleChange}
+                                    disabled={formData.role === 'employe'}
+                                />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label for="identifiant">Identifiant</Label>
+                                <Input
+                                    id="identifiant"
+                                    name="identifiant"
+                                    value={formData.identifiant}
+                                    onChange={handleChange}
+                                    disabled={formData.role === 'employe'}
+                                />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label for="id_unite">Unité</Label>
+                                <Input
+                                    id="id_unite"
+                                    name="id_unite"
+                                    type="select"
+                                    value={formData.id_unite}
+                                    onChange={handleChange}
+                                    disabled={formData.role === 'employe'}
+                                >
+                                    <option value="">Sélectionnez une unité</option>
+                                    {units.map(unit => (
+                                        <option key={unit.id_unite} value={unit.id_unite}>
+                                            {unit.nom_unite}  
+                                        </option>
+                                    ))}
+                                </Input>
+                            </FormGroup>
                             <Button type="submit">Ajouter l'utilisateur</Button>
                         </Form>
                     </CardBody>
                 </Card>
                 <Link to="/user-list">
-              <Button color="secondary" >
-                 Annuler
-              </Button>
-              </Link>
+                    <Button color="secondary">Annuler</Button>
+                </Link>
             </Col>
         </Row>
     );

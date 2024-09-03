@@ -11,7 +11,8 @@ import {
   Form,
   FormGroup,
   Label,
-  Input
+  Input,
+  FormFeedback
 } from 'reactstrap';
 
 axios.defaults.xsrfCookieName = 'csrftoken';
@@ -40,8 +41,9 @@ const AddClass = () => {
     startingLibelleClasse: '',
     numberOfClasses: 1
   });
-
+  const [errors, setErrors] = useState({});
   const [niveaux, setNiveaux] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Fetch niveaux for the select dropdown
@@ -62,10 +64,34 @@ const AddClass = () => {
     });
   };
 
-  const navigate = useNavigate();
+  const validate = () => {
+    const errors = {};
+    const { NbEtudiantClasse, numberOfClasses, startingLibelleClasse } = formData;
+
+    if (Number(NbEtudiantClasse) > 40) {
+      errors.NbEtudiantClasse = 'Le nombre d\'étudiants ne peut pas dépasser 40.';
+    }
+
+    if (Number(numberOfClasses) < 1) {
+      errors.numberOfClasses = 'Le nombre de classes à ajouter doit être au moins 1.';
+    }
+
+    if (Number(startingLibelleClasse) < 1) {
+      errors.startingLibelleClasse = 'Le libellé de la classe de départ doit être un nombre positif.';
+    }
+
+    return errors;
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
     const csrftoken = getCookie('csrftoken'); // Extract CSRF token
     const classes = [];
 
@@ -122,7 +148,9 @@ const AddClass = () => {
                   value={formData.NbEtudiantClasse}
                   onChange={handleChange}
                   required
+                  invalid={!!errors.NbEtudiantClasse}
                 />
+                {errors.NbEtudiantClasse && <FormFeedback>{errors.NbEtudiantClasse}</FormFeedback>}
               </FormGroup>
               <FormGroup>
                 <Label for="id_niveau">Niveau</Label>
@@ -151,7 +179,9 @@ const AddClass = () => {
                   value={formData.startingLibelleClasse}
                   onChange={handleChange}
                   required
+                  invalid={!!errors.startingLibelleClasse}
                 />
+                {errors.startingLibelleClasse && <FormFeedback>{errors.startingLibelleClasse}</FormFeedback>}
               </FormGroup>
               <FormGroup>
                 <Label for="numberOfClasses">Nombre de Classes à ajouter</Label>
@@ -163,7 +193,9 @@ const AddClass = () => {
                   onChange={handleChange}
                   min="1"
                   required
+                  invalid={!!errors.numberOfClasses}
                 />
+                {errors.numberOfClasses && <FormFeedback>{errors.numberOfClasses}</FormFeedback>}
               </FormGroup>
               <Button type="submit">Ajouter les Classes</Button>
             </Form>

@@ -14,10 +14,6 @@ import {
   Input
 } from 'reactstrap';
 
-axios.defaults.xsrfCookieName = 'csrftoken';
-axios.defaults.xsrfHeaderName = 'X-CSRFToken';
-axios.defaults.withCredentials = true;
-
 // Fonction pour obtenir un cookie spécifique par son nom
 const getCookie = (name) => {
     let cookieValue = null;
@@ -47,7 +43,7 @@ const AddModule = () => {
 
     useEffect(() => {
         // Récupérer les données des niveaux
-        axios.get('http://127.0.0.1:8000/Niveau/displayallNiveaux/')  // Ajuster le point de terminaison si nécessaire
+        axios.get('http://127.0.0.1:8000/Niveau/displayallNiveaux/')
             .then(response => {
                 setNiveaux(response.data);
             })
@@ -132,8 +128,8 @@ const AddModule = () => {
                                 >
                                     <option value="">Sélectionnez un niveau</option>
                                     {niveaux.map(niveau => (
-                                        <option key={niveau.id} value={niveau.id}>
-                                            {niveau.id_niveau}
+                                        <option key={niveau.id_niveau} value={niveau.id_niveau}>
+                                            {niveau.libelleNiv}
                                         </option>
                                     ))}
                                 </Input>

@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 const UserList = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [units, setUnits] = useState([]);
 
   useEffect(() => {
     axios.get('http://127.0.0.1:8000/api/displayall')
@@ -19,20 +20,32 @@ const UserList = () => {
         console.error("Il y a eu une erreur!", error);
         setLoading(false);
       });
+
+    const fetchUnites = async () => {
+      try {
+        const response = await axios.get('http://127.0.0.1:8000/unite/unites/');
+        setUnits(response.data);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des unités:", error);
+      }
+    };
+
+    fetchUnites();
   }, []);
 
-  const handleDelete = (id) => {
-    // Implémentez la fonctionnalité de suppression
-    console.log(`Supprimer l'utilisateur avec l'ID : ${id}`);
+  const getUniteNameById = (id) => {
+    const unit = units.find(unit => unit.id_unite === id);
+    return unit ? unit.nom_unite : '';
   };
 
-  
-
- 
+  const handleDelete = (id) => {
+    console.log(`Supprimer l'utilisateur avec l'ID : ${id}`);
+    // Implémentez la fonctionnalité de suppression ici
+  };
 
   const handleAdd = () => {
-    console.log('Add new user');
-    // Implement add functionality, e.g., navigating to an add user form
+    console.log('Ajouter un nouvel utilisateur');
+    // Implémentez la fonctionnalité d'ajout ici
   };
 
   if (loading) {
@@ -59,6 +72,7 @@ const UserList = () => {
                   <th>Role Enseignant</th>
                   <th>Identifiant</th>
                   <th>Quota</th>
+                  <th>Unité</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -66,12 +80,11 @@ const UserList = () => {
                 {users.map(user => (
                   <tr key={user.user_id}>
                     <td>
-                    <img 
+                      <img 
                         src={`http://127.0.0.1:8000${user.image_user}`} 
                         className="user-image"
                         alt=''
                       />
-
                     </td>
                     <td>{user.username}</td>
                     <td>{user.email}</td>
@@ -80,12 +93,13 @@ const UserList = () => {
                     <td>{user.roleRes}</td>
                     <td>{user.identifiant}</td>
                     <td>{user.quota}</td>
+                    <td>{getUniteNameById(user.id_unite)}</td>
                     <td>
                       <ButtonGroup>
-                      <Link to={`/user-up/${user.user_id}`}>
-                       <Button color="secondary">
-                        <FaEdit />
-                         </Button>
+                        <Link to={`/user-up/${user.user_id}`}>
+                          <Button color="secondary">
+                            <FaEdit />
+                          </Button>
                         </Link>
 
                         <Link to={`/user-del/${user.user_id}`}>

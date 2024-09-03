@@ -13,6 +13,7 @@ const ExamenList = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortField, setSortField] = useState('');
   const [sortOrder, setSortOrder] = useState('asc'); // 'asc' ou 'desc'
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchExamens = async () => {
@@ -46,6 +47,7 @@ const ExamenList = () => {
     fetchExamens();
     fetchSessions();
     fetchModules();
+    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -91,12 +93,14 @@ const ExamenList = () => {
 
   // Fonction pour obtenir le nom de la session par ID
   const getSessionNameById = (id) => {
+    console.log(`Recherche du nom de session pour l'ID : ${id}`);
     const session = sessions.find(session => session.id_session === id);
     return session ? session.nom_session : 'Inconnu';
   };
 
   // Fonction pour obtenir le nom du module par ID
   const getModuleNameById = (id) => {
+    console.log(`Recherche du nom du module pour l'ID : ${id}`);
     const module = modules.find(module => module.id_module === id);
     return module ? module.nom_module : 'Inconnu';
   };
@@ -110,65 +114,71 @@ const ExamenList = () => {
             Liste des examens
           </CardTitle>
           <CardBody>
-            <FormGroup className="mb-3">
-              <Input
-                type="text"
-                placeholder="Rechercher par examen"
-                value={searchQuery}
-                onChange={handleSearchChange}
-              />
-            </FormGroup>
-            <div className="mb-3">
-              <Button color="secondary" onClick={() => handleSort('nom_examen')}>
-                Nom {sortField === 'nom_examen' && (sortOrder === 'asc' ? <FaSortAlphaUp /> : <FaSortAlphaDown />)}
-              </Button>
-            </div>
-            <Table className="modern-table" responsive>
-              <thead>
-                <tr>
-                  <th>Nom de l'examen</th>
-                  <th>Date</th>
-                  <th>Durée</th>
-                  <th>Type</th>
-                  <th>Session</th>
-                  <th>Module</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredExamens.map(examen => (
-                  <tr key={examen.id_examen}>
-                    <td>{examen.nom_examen}</td>
-                    <td>{examen.date_examen}</td>
-                    <td>{examen.duree_examen}</td>
-                    <td>{examen.type_examen}</td>
-                    <td>{getSessionNameById(examen.id_session)}</td>
-                    <td>{getModuleNameById(examen.id_module)}</td>
-                    <td>
-                      <ButtonGroup>
-                        <Link to={`/examen-up/${examen.id_examen}`}>
-                          <Button color="secondary" onClick={() => handleEdit(examen.id_examen)}>
-                            <FaEdit />
-                          </Button>
-                        </Link>
-                        <Link to={`/examen-del/${examen.id_examen}`}>
-                          <Button color="dark" onClick={() => handleDelete(examen.id_examen)}>
-                            <FaTrashAlt />
-                          </Button>
-                        </Link>
-                      </ButtonGroup>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-            <div className="text-center mt-3">
-              <Link to="/addExamen">
-                <Button color="secondary" onClick={handleAdd}>
-                  <FaPlus /> Ajouter un examen
-                </Button>
-              </Link>
-            </div>
+            {loading ? (
+              <div>Chargement...</div>
+            ) : (
+              <>
+                <FormGroup className="mb-3">
+                  <Input
+                    type="text"
+                    placeholder="Rechercher par examen"
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                  />
+                </FormGroup>
+                <div className="mb-3">
+                  <Button color="secondary" onClick={() => handleSort('nom_examen')}>
+                    Nom {sortField === 'nom_examen' && (sortOrder === 'asc' ? <FaSortAlphaUp /> : <FaSortAlphaDown />)}
+                  </Button>
+                </div>
+                <Table className="modern-table" responsive>
+                  <thead>
+                    <tr>
+                      <th>Nom de l'examen</th>
+                      <th>Date</th>
+                      <th>Durée</th>
+                      <th>Type</th>
+                      <th>Session</th>
+                      <th>Module</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredExamens.map(examen => (
+                      <tr key={examen.id_examen}>
+                        <td>{examen.nom_examen}</td>
+                        <td>{examen.date_examen}</td>
+                        <td>{examen.duree_examen}</td>
+                        <td>{examen.type_examen}</td>
+                        <td>{getSessionNameById(examen.id_session)}</td>
+                        <td>{getModuleNameById(examen.id_module)}</td>
+                        <td>
+                          <ButtonGroup>
+                            <Link to={`/examen-up/${examen.id_examen}`}>
+                              <Button color="secondary" onClick={() => handleEdit(examen.id_examen)}>
+                                <FaEdit />
+                              </Button>
+                            </Link>
+                            <Link to={`/examen-del/${examen.id_examen}`}>
+                              <Button color="dark" onClick={() => handleDelete(examen.id_examen)}>
+                                <FaTrashAlt />
+                              </Button>
+                            </Link>
+                          </ButtonGroup>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+                <div className="text-center mt-3">
+                  <Link to="/addExamen">
+                    <Button color="secondary" onClick={handleAdd}>
+                      <FaPlus /> Ajouter un examen
+                    </Button>
+                  </Link>
+                </div>
+              </>
+            )}
           </CardBody>
         </Card>
       </Col>

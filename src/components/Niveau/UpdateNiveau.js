@@ -11,7 +11,8 @@ import {
   Form,
   FormGroup,
   Label,
-  Input
+  Input,
+  FormFeedback
 } from 'reactstrap';
 
 // Function to get CSRF token from cookies
@@ -42,6 +43,7 @@ const EditNiveau = () => {
     nbclasseNiv: 0 // Set to 0 by default
   });
   const [requiresSpecialite, setRequiresSpecialite] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const { id_niveau } = useParams();
   const navigate = useNavigate();
@@ -73,11 +75,29 @@ const EditNiveau = () => {
     }
   };
 
+  const validate = () => {
+    const errors = {};
+    if (!formData.libelleNiv.trim()) {
+      errors.libelleNiv = 'Le libellé du niveau est requis.';
+    }
+    if (requiresSpecialite && !formData.specialite.trim()) {
+      errors.specialite = 'La spécialité est requise lorsque le niveau nécessite une spécialité.';
+    }
+    return errors;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
     const dataToSend = {
       ...formData,
+      nbclasseNiv: 0, // Ensure nbclasseNiv is always 0
       specialite: requiresSpecialite ? formData.specialite : ''
     };
 
@@ -117,19 +137,11 @@ const EditNiveau = () => {
                   value={formData.libelleNiv}
                   onChange={handleChange}
                   required
+                  invalid={!!errors.libelleNiv}
                 />
+                {errors.libelleNiv && <FormFeedback>{errors.libelleNiv}</FormFeedback>}
               </FormGroup>
-              <FormGroup>
-                <Label for="nbclasseNiv">Nombre de Classes</Label>
-                <Input
-                  id="nbclasseNiv"
-                  name="nbclasseNiv"
-                  type="number"
-                  value={formData.nbclasseNiv}
-                  onChange={handleChange}
-                  required
-                />
-              </FormGroup>
+              {/* Removed the nbclasseNiv field */}
               <FormGroup check>
                 <Label check>
                   <Input
@@ -149,7 +161,9 @@ const EditNiveau = () => {
                     type="text"
                     value={formData.specialite}
                     onChange={handleChange}
+                    invalid={!!errors.specialite}
                   />
+                  {errors.specialite && <FormFeedback>{errors.specialite}</FormFeedback>}
                 </FormGroup>
               )}
               <Button type="submit">Modifier le Niveau</Button>

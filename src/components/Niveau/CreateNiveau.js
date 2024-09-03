@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -11,7 +11,8 @@ import {
   Form,
   FormGroup,
   Label,
-  Input
+  Input,
+  FormFeedback
 } from 'reactstrap';
 
 axios.defaults.xsrfCookieName = 'csrftoken';
@@ -40,8 +41,20 @@ const AddNiveau = () => {
     nbclasseNiv: 0 // Default to 0
   });
   const [requiresSpecialite, setRequiresSpecialite] = useState(false);
-
+  const [errors, setErrors] = useState({});
+  const [existingNiveaux, setExistingNiveaux] = useState([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Fetch existing niveaux when the component mounts
+    axios.get('http://127.0.0.1:8000/Niveau/displayallNiveaux/')
+      .then(response => {
+        setExistingNiveaux(response.data);
+      })
+      .catch(error => {
+        console.error('There was an error fetching niveaux!', error);
+      });
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -58,12 +71,44 @@ const AddNiveau = () => {
     }
   };
 
+  const validate = () => {
+    const errors = {};
+    if (!formData.libelleNiv.trim()) {
+      errors.libelleNiv = 'Le libellé du niveau est requis.';
+    }
+    if (requiresSpecialite && !formData.specialite.trim()) {
+      errors.specialite = 'La spécialité est requise lorsque le niveau nécessite une spécialité.';
+    }
+    return errors;
+  };
+
+  const checkIfNiveauExists = () => {
+    return existingNiveaux.some(niveau => 
+      niveau.libelleNiv === formData.libelleNiv && 
+      (niveau.specialite === formData.specialite || (!requiresSpecialite && !niveau.specialite))
+    );
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    if (checkIfNiveauExists()) {
+      alert('Ce niveau existe déjà!');
+      return;
+    }
+
     const csrftoken = getCookie('csrftoken'); // Extract CSRF token
 
+    // Set nbclasseNiv to 0 before sending the data
     const dataToSend = {
       ...formData,
+      nbclasseNiv: 0,
       specialite: requiresSpecialite ? formData.specialite : ''
     };
 
@@ -74,21 +119,22 @@ const AddNiveau = () => {
     })
       .then(response => {
         if (response.status === 201) {
-          alert('Niveau added successfully!');
+          alert('Niveau ajouté avec succès!');
           setFormData({ libelleNiv: '', specialite: '', nbclasseNiv: 0 }); // Reset form
+          setErrors({});
           navigate('/NiveauList');
         } else {
-          alert('Unexpected response status');
+          alert('Réponse inattendue du serveur.');
         }
       })
       .catch(error => {
-        console.error('There was an error adding the niveau!', error);
+        console.error('Erreur lors de l\'ajout du niveau!', error);
         if (error.response) {
-          alert(`Error adding niveau. Status: ${error.response.status}, Data: ${JSON.stringify(error.response.data)}`);
+          alert(`Erreur d'ajout du niveau. Statut: ${error.response.status}, Données: ${JSON.stringify(error.response.data)}`);
         } else if (error.request) {
-          alert('Error adding niveau. No response received.');
+          alert('Erreur d\'ajout du niveau. Aucune réponse reçue.');
         } else {
-          alert(`Error adding niveau. Message: ${error.message}`);
+          alert(`Erreur d'ajout du niveau. Message: ${error.message}`);
         }
       });
   };
@@ -111,20 +157,11 @@ const AddNiveau = () => {
                   type="text"
                   value={formData.libelleNiv}
                   onChange={handleChange}
-                  required
+                  invalid={!!errors.libelleNiv}
                 />
+                {errors.libelleNiv && <FormFeedback>{errors.libelleNiv}</FormFeedback>}
               </FormGroup>
-              <FormGroup>
-                <Label for="nbclasseNiv">Nombre de Classes</Label>
-                <Input
-                  id="nbclasseNiv"
-                  name="nbclasseNiv"
-                  type="number"
-                  value={formData.nbclasseNiv}
-                  onChange={handleChange}
-                  required
-                />
-              </FormGroup>
+              {/* Removed the nbclasseNiv field */}
               <FormGroup check>
                 <Label check>
                   <Input
@@ -144,7 +181,9 @@ const AddNiveau = () => {
                     type="text"
                     value={formData.specialite}
                     onChange={handleChange}
+                    invalid={!!errors.specialite}
                   />
+                  {errors.specialite && <FormFeedback>{errors.specialite}</FormFeedback>}
                 </FormGroup>
               )}
               <Button type="submit">Ajouter le Niveau</Button>

@@ -13,6 +13,7 @@ import {
   Label,
   Input
 } from 'reactstrap';
+
 axios.defaults.xsrfCookieName = 'csrftoken';
 axios.defaults.xsrfHeaderName = 'X-CSRFToken';
 axios.defaults.withCredentials = true;
@@ -31,6 +32,7 @@ const getCookie = (name) => {
     }
     return cookieValue;
 };
+
 const AddExamen = () => {
     const [formData, setFormData] = useState({
         nom_examen: '',
@@ -48,6 +50,7 @@ const AddExamen = () => {
         // Fetch sessions from the API
         axios.get('http://127.0.0.1:8000/session/displayall')
             .then(response => {
+                console.log('Sessions fetched:', response.data); // Ajout de log
                 setSessions(response.data);
             })
             .catch(error => {
@@ -72,10 +75,10 @@ const AddExamen = () => {
         });
     };
 
-    const navigate = useNavigate();  // Déclaration correcte
+    const navigate = useNavigate();
     const handleSubmit = (e) => {
         e.preventDefault();
-        const csrftoken = getCookie('csrftoken');  // Dynamically extract CSRF token
+        const csrftoken = getCookie('csrftoken');
 
         const dataToSend = new FormData();
         Object.keys(formData).forEach(key => {
@@ -84,7 +87,7 @@ const AddExamen = () => {
 
         axios.post('http://127.0.0.1:8000/examen/addExamen/', dataToSend, {
             headers: {
-                'X-CSRFToken': csrftoken  // Include CSRF token in the headers
+                'X-CSRFToken': csrftoken
             }
         })
         .then(response => {
@@ -124,7 +127,6 @@ const AddExamen = () => {
                                     onChange={handleChange}
                                     required
                                 />
-                            
                             </FormGroup>
                     
                             <FormGroup>
@@ -158,9 +160,11 @@ const AddExamen = () => {
                                     type="select"
                                     required
                                 >
-                                   <option value="">Sélectionnez le type d'examen</option>
+                                    <option value="">Sélectionnez le type d'examen</option>
                                     <option value="theorique">Théorique</option>
                                     <option value="pratique">Pratique</option>
+                                    <option value="soutenance">Soutenance</option>
+                                    <option value="stage">Stage</option>
                                 </Input>
                             </FormGroup>
 
@@ -175,11 +179,15 @@ const AddExamen = () => {
                                     required
                                 >
                                     <option value="">Sélectionnez une session</option>
-                                    {sessions.map(session => (
-                                        <option key={session.id_session} value={session.id_session}>
-                                            {session.nom_session}
-                                        </option>
-                                    ))}
+                                    {sessions.length > 0 ? (
+                                        sessions.map(session => (
+                                            <option key={session.id_session} value={session.id_session}>
+                                                {session.nom_session}
+                                            </option>
+                                        ))
+                                    ) : (
+                                        <option value="">Aucune session disponible</option>
+                                    )}
                                 </Input>
                             </FormGroup>
 
@@ -194,11 +202,15 @@ const AddExamen = () => {
                                     required
                                 >
                                     <option value="">Sélectionnez un module</option>
-                                    {modules.map(module => (
-                                        <option key={module.id_module} value={module.id_module}>
-                                            {module.nom_module}
-                                        </option>
-                                    ))}
+                                    {modules.length > 0 ? (
+                                        modules.map(module => (
+                                            <option key={module.id_module} value={module.id_module}>
+                                                {module.nom_module}
+                                            </option>
+                                        ))
+                                    ) : (
+                                        <option value="">Aucun module disponible</option>
+                                    )}
                                 </Input>
                             </FormGroup>
                            

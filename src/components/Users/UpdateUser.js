@@ -28,17 +28,18 @@ const UpdateUser = () => {
   const [userData, setUserData] = useState({
     username: '',
     email: '',
-    password: '',
     cin: '',
     quota: '',
-    role: '',   
+    role: '',
     identifiant: '',
-    roleRes: '',
-    image_user: '',
+    roleRes: '',      
+    id_unite: '',
+    image_user: null,
   });
 
   const [message, setMessage] = useState('');
-  
+  const [units, setUnits] = useState([]);
+
   
   const navigate = useNavigate(); 
 
@@ -59,7 +60,13 @@ useEffect(() => {
       }
     }
   };
-
+  axios.get('http://127.0.0.1:8000/unite/unites/')  // Remplacez l'URL par celle de votre API
+  .then(response => {
+      setUnits(response.data);  // Assurez-vous que les données sont un tableau d'unités
+  })
+  .catch(error => {
+      console.error('Erreur lors de la récupération des unités!', error);
+  });
   fetchUser();
 }, [user_id]);
 
@@ -117,103 +124,119 @@ useEffect(() => {
           </CardTitle>
           <CardBody>
             <Form onSubmit={handleSubmit}>
-              <FormGroup>
-                <Label for="cin">CIN</Label>
-                <Input
-                  id="cin"
-                  name="cin"
-                  value={userData.cin}
-                  onChange={handleChange}
-                  required
-                />
-              </FormGroup>
-              <FormGroup>
-                <Label for="quota">Quota</Label>
-                <Input
-                  id="quota"
-                  name="quota"
-                  value={userData.quota}
-                  onChange={handleChange}
-                  required
-                />
-              </FormGroup>
-             
-              <FormGroup>
-                <Label for="email">Email</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={userData.email}
-                  onChange={handleChange}
-                  required
-                />
-              </FormGroup>
-              
-              <FormGroup>
-                <Label for="username">Nom</Label>
-                <Input
-                  id="username"
-                  name="username"
-                  value={userData.username}
-                  onChange={handleChange}
-                  required
-                />
-              </FormGroup>
-              
-              <FormGroup>
-                <Label for="identifiant">Identifiant</Label>
-                <Input
-                  id="identifiant"
-                  name="identifiant"
-                  value={userData.identifiant}
-                  onChange={handleChange}
-                  required
-                />
-              </FormGroup>
-              <FormGroup>
-                <Label for="image_user">Image de l'utilisateur</Label>
-                <Input
-                  id="image_user"
-                  name="image_user"
-                  type="file"
-                  onChange={handleFileChange}
-                  accept="image/*"
-                />
-              </FormGroup>
-              <FormGroup>
-                <Label for="role">Rôle</Label>
-                <Input
-                  id="role"
-                  name="role"
-                  type="select"
-                  value={userData.role}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Sélectionnez un rôle</option>
-                  <option value="employe">Employé</option>
-                  <option value="enseignant">Enseignant</option>
-                </Input>
-              </FormGroup>
-              <FormGroup>
-                <Label for="roleRes">Rôle Enseignant</Label>
-                <Input
-                  id="roleRes"
-                  name="roleRes"
-                  type="select"
-                  value={userData.roleRes}
-                  onChange={handleChange}
-                  disabled={userData.role === 'employe'}
-                >
-                  <option value="">Sélectionnez un rôle</option>
-                  <option value="cup">CUP</option>
-                  <option value="directeur">Directeur des étudiants</option>
-                  <option value="ro">Responsable d'option</option>
-                  <option value="chef">Chef département</option>
-                  <option value="simple">Enseignant</option>
-                </Input>
-              </FormGroup>
+            <FormGroup>
+                                <Label for="username">Nom</Label>
+                                <Input
+                                    id="username"
+                                    name="username"
+                                    value={userData.username}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label for="email">Email</Label>
+                                <Input
+                                    id="email"
+                                    name="email"
+                                    value={userData.email}
+                                    onChange={handleChange}
+                                    type="email"
+                                    required
+                                />
+                            </FormGroup>
+                           
+                            <FormGroup>
+                                <Label for="cin">CIN</Label>
+                                <Input
+                                    id="cin"
+                                    name="cin"
+                                    value={userData.cin}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label for="image_user">Image de l'utilisateur</Label>
+                                <Input
+                                    id="image_user"
+                                    name="image_user"
+                                    type="file"
+                                    onChange={handleFileChange}
+                                    accept="image/*"
+                                />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label for="role">Rôle</Label>
+                                <Input
+                                    id="role"
+                                    name="role"
+                                    value={userData.role}
+                                    onChange={handleChange}
+                                    type="select"
+                                    required
+                                >
+                                    <option value="">Sélectionnez un rôle</option>
+                                    <option value="employe">Employé</option>
+                                    <option value="enseignant">Enseignant</option>
+                                </Input>
+                            </FormGroup>
+                            <FormGroup>
+                                <Label for="roleRes">Rôle Enseignant</Label>
+                                <Input
+                                    id="roleRes"
+                                    name="roleRes"
+                                    value={userData.roleRes}
+                                    onChange={handleChange}
+                                    type="select"
+                                    disabled={userData.role === 'employe'}
+                                >
+                                    <option value="">Sélectionnez un rôle </option>
+                                    <option value="cup">CUP</option>
+                                    <option value="directeur">Directeur des étudiants</option>
+                                    <option value="ro">Responsable d'option</option>
+                                    <option value="chef">Chef département</option>
+                                    <option value="simple">Enseignant</option>
+                                </Input>
+                            </FormGroup>
+                            <FormGroup>
+                                <Label for="quota">Quota</Label>
+                                <Input
+                                    id="quota"
+                                    name="quota"
+                                    value={userData.quota}
+                                    onChange={handleChange}
+                                    disabled={userData.role === 'employe'}
+                                />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label for="identifiant">Identifiant</Label>
+                                <Input
+                                    id="identifiant"
+                                    name="identifiant"
+                                    value={userData.identifiant}
+                                    onChange={handleChange}
+                                    disabled={userData.role === 'employe'}
+                                />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label for="id_unite">Unité</Label>
+                                <Input
+                                    id="id_unite"
+                                    name="id_unite"
+                                    type="select"
+                                    value={userData.id_unite}
+                                    onChange={handleChange}
+                                    disabled={userData.role === 'employe'}
+                                >
+                                    <option value="">Sélectionnez une unité</option>
+                                    {units.map(unit => (
+                                        <option key={unit.id_unite} value={unit.id_unite}>
+                                            {unit.nom_unite}  
+                                        </option>
+                                    ))}
+                                </Input>
+                            </FormGroup>
               
               <Button type="submit">Mettre à jour l'utilisateur</Button>
             </Form>

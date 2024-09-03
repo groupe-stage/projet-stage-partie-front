@@ -5,93 +5,65 @@ import { FaTrashAlt, FaPlus } from 'react-icons/fa';
 import './Module_niveauList.css';
 import { Link } from 'react-router-dom';
 
-// Function to get the value of a cookie by its name
-function getCookie(name) {
-  let cookieValue = null;
-  if (document.cookie && document.cookie !== '') {
-    const cookies = document.cookie.split(';');
-    for (let i = 0; i < cookies.length; i++) {
-      const cookie = cookies[i].trim();
-      if (cookie.substring(0, name.length + 1) === (name + '=')) {
-        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-        break;
-      }
-    }
-  }
-  return cookieValue;
-}
-
-// Default Axios configuration to include CSRF cookie
-axios.defaults.xsrfCookieName = 'csrftoken';
-axios.defaults.xsrfHeaderName = 'X-CSRFToken';
-axios.defaults.withCredentials = true;
-
 const Module_niveauList = () => {
-  const [modniv, setModniv] = useState([]);
+  const [module_niveau, setModule_niveau] = useState([]);
   const [niveaux, setNiveaux] = useState([]);
   const [modules, setModules] = useState([]);
 
   useEffect(() => {
-    // Fetch data for modniv
-    axios.get('http://127.0.0.1:8000/modniv/all/')
+    // Récupérer les données de Module_niveau
+    axios.get('http://127.0.0.1:8000/Module_niveau/displayall/')
       .then(response => {
-        setModniv(response.data);
+        setModule_niveau(response.data);
       })
       .catch(error => {
-        console.error("Error fetching modniv data:", error);
+        console.error("Il y a eu une erreur!", error);
       });
 
-    // Fetch data for modules
+    // Récupérer les données des modules
     const fetchModules = async () => {
       try {
         const response = await axios.get('http://127.0.0.1:8000/module/displayall');
         setModules(response.data);
       } catch (error) {
-        console.error("Error fetching modules:", error);
+        console.error("Erreur lors de la récupération des modules:", error);
       }
     };
 
-    // Fetch data for niveaux
-    const fetchNiveaux = async () => {
+    // Récupérer les données des niveaux
+    const fetchNiveau = async () => {
       try {
         const response = await axios.get('http://127.0.0.1:8000/Niveau/displayallNiveaux');
         setNiveaux(response.data);
       } catch (error) {
-        console.error("Error fetching niveaux:", error);
+        console.error("Erreur lors de la récupération des niveaux:", error);
       }
     };
 
+    fetchNiveau();
     fetchModules();
-    fetchNiveaux();
   }, []);
 
-  // Function to get the module name by ID
+  // Fonction pour obtenir le nom du module par ID
   const getModuleNameById = (id) => {
     const module = modules.find(module => module.id_module === id);
-    return module ? module.nom_module : 'Unknown';
+    return module ? module.nom_module : 'Inconnu';
   };
 
-  // Function to get the niveau name by ID
+  // Fonction pour obtenir le nom du niveau par ID
   const getNiveauNameById = (id) => {
     const niveau = niveaux.find(niveau => niveau.id_niveau === id);
-    return niveau ? niveau.libelleNiv : 'Unknown';
+    return niveau ? niveau.libelleNiv : 'Inconnu';
   };
 
-  // Function to handle delete
-  const handleDelete = (idmn) => {
-    const csrftoken = getCookie('csrftoken'); // Get CSRF token from cookie
-    axios.delete(`http://127.0.0.1:8000/modniv/delete/${idmn}/`, {
-      headers: {
-        'X-CSRFToken': csrftoken // Include CSRF token in headers
-      }
-    })
-    .then(() => {
-      // Refresh the data after deletion
-      setModniv(modniv.filter(item => item.idmn !== idmn));
-    })
-    .catch(error => {
-      console.error("Error deleting item:", error);
-    });
+  // Fonction pour gérer la suppression
+  const handleDelete = (id_module, id_niveau) => {
+    console.log(`Supprimer l'affectation avec ID Module: ${id_module} et ID Niveau: ${id_niveau}`);
+  };
+
+  // Fonction pour ajouter une nouvelle affectation
+  const handleAdd = () => {
+    console.log('Ajouter une nouvelle affectation');
   };
 
   return (
@@ -99,7 +71,7 @@ const Module_niveauList = () => {
       <Col lg="12">
         <Card>
           <CardTitle tag="h6" className="border-bottom p-3 mb-0">
-            List of Module-Niveau Assignments
+            Liste des affectations des modules aux niveaux
           </CardTitle>
           <CardBody>
             <Table className="modern-table" responsive>
@@ -111,15 +83,17 @@ const Module_niveauList = () => {
                 </tr>
               </thead>
               <tbody>
-                {modniv.map((item) => (
-                  <tr key={item.idmn}>
+                {module_niveau.map((item) => (
+                  <tr key={`${item.id_module}-${item.id_niveau}`}>
                     <td>{getModuleNameById(item.id_module)}</td>
                     <td>{getNiveauNameById(item.id_niveau)}</td>
                     <td>
                       <ButtonGroup>
-                        <Button color="dark" onClick={() => handleDelete(item.idmn)}>
-                          <FaTrashAlt />
-                        </Button>
+                        <Link to={`/Module_niveau-del/${item.id_module}`}>
+                          <Button color="dark" onClick={() => handleDelete(item.id_module, item.id_niveau)}>
+                            <FaTrashAlt />
+                          </Button>
+                        </Link>
                       </ButtonGroup>
                     </td>
                   </tr>
@@ -128,8 +102,8 @@ const Module_niveauList = () => {
             </Table>
             <div className="text-center mt-3">
               <Link to="/addModule_niveau">
-                <Button color="secondary">
-                  <FaPlus /> Add Assignment
+                <Button color="secondary" onClick={handleAdd}>
+                  <FaPlus /> Ajouter une affectation
                 </Button>
               </Link>
             </div>

@@ -11,10 +11,11 @@ import {
   Form,
   FormGroup,
   Label,
-  Input
+  Input,
+  Spinner
 } from 'reactstrap';
 
-// Fonction pour obtenir la valeur d'un cookie par son nom
+// Function to get the value of a cookie by its name
 const getCookie = (name) => {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -33,65 +34,130 @@ const getCookie = (name) => {
 const AddModule_niveau = () => {
     const [formData, setFormData] = useState({
         id_module: '',
-        id_niveau: '',
+        id_niveaux: [],  // To handle multiple selected Niveaux
     });
-
     const [niveaux, setNiveaux] = useState([]);
     const [modules, setModules] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [existingCombos, setExistingCombos] = useState([]);
 
     useEffect(() => {
-        // Récupérer les données des modules
+        // Fetch data for modules
         axios.get('http://127.0.0.1:8000/module/displayall')
             .then(response => {
                 setModules(response.data);
             })
             .catch(error => {
-                console.error('Il y a eu une erreur lors de la récupération des modules!', error);
+                console.error('Erreur lors de la récupération des modules!', error);
+                setError('Erreur lors de la récupération des modules.');
             });
 
-        // Récupérer les données des niveaux
+        // Fetch data for niveaux
         axios.get('http://127.0.0.1:8000/Niveau/displayallNiveaux')
             .then(response => {
                 setNiveaux(response.data);
             })
             .catch(error => {
-                console.error('Il y a eu une erreur lors de la récupération des niveaux!', error);
+                console.error('Erreur lors de la récupération des niveaux!', error);
+                setError('Erreur lors de la récupération des niveaux.');
+            });
+
+        // Fetch existing combinations
+        axios.get('http://127.0.0.1:8000/modniv/displayall/')
+            .then(response => {
+                setExistingCombos(response.data);
+            })
+            .catch(error => {
+                console.error('Erreur lors de la récupération des combinaisons existantes!', error);
             });
     }, []);
 
-    // Fonction pour gérer les changements dans le formulaire
+    // Handle form changes
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({
-            ...formData,
-            [name]: value
-        });
+        const { name, value, checked } = e.target;
+
+        if (name === "id_niveaux") {
+            const selectedNiveaux = formData.id_niveaux.slice();  // Copy the array
+            const parsedValue = parseInt(value, 10);  // Parse value to an integer
+
+            if (checked) {
+                if (!selectedNiveaux.includes(parsedValue)) {
+                    selectedNiveaux.push(parsedValue);  // Add selected niveau
+                }
+            } else {
+                const index = selectedNiveaux.indexOf(parsedValue);  // Find index of unselected niveau
+                if (index > -1) {
+                    selectedNiveaux.splice(index, 1);  // Remove unselected niveau
+                }
+            }
+
+            setFormData({
+                ...formData,
+                id_niveaux: selectedNiveaux
+            });
+        } else {
+            setFormData({
+                ...formData,
+                [name]: value
+            });
+        }
     };
 
     const navigate = useNavigate();
-    
-    // Fonction pour gérer la soumission du formulaire
-    const handleSubmit = (e) => {
+
+    // Handle form submission
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
+        setError('');
+
         const csrftoken = getCookie('csrftoken');
 
-        axios.post('http://127.0.0.1:8000/Module_niveau/addModule_niveau/', formData, {
-            headers: {
-                'X-CSRFToken': csrftoken
+        try {
+            // Create a set of existing combinations for fast lookup
+            const existingComboSet = new Set(
+                existingCombos.map(combo => `${combo.id_module}-${combo.id_niveau}`)
+            );
+
+            // Filter out combinations that already exist
+            const newCombos = formData.id_niveaux.filter(id_niveau => {
+                const comboKey = `${formData.id_module}-${id_niveau}`;
+                return !existingComboSet.has(comboKey);
+            });
+
+            if (newCombos.length === 0) {
+                alert('Tous les combos existent déjà.');
+                return;
             }
-        })
-        .then(response => {
-            alert('Affectation ajoutée avec succès !');
+
+            // Create a promise for each selected Niveau that is not a duplicate
+            const requests = newCombos.map(id_niveau => {
+                return axios.post('http://127.0.0.1:8000/modniv/add/', {
+                    id_module: formData.id_module,
+                    id_niveau: id_niveau
+                }, {
+                    headers: {
+                        'X-CSRFToken': csrftoken
+                    }
+                });
+            });
+
+            // Execute all promises
+            await Promise.all(requests);
+
+            alert('Affectations ajoutées avec succès !');
             navigate('/Module_niveau-list');
             setFormData({
                 id_module: '',
-                id_niveau: '',
+                id_niveaux: [],
             });
-        })
-        .catch(error => {
-            console.error('Il y a eu une erreur lors de l\'ajout de l\'affectation !', error);
-            alert('Erreur lors de l\'ajout de l\'affectation.');
-        });
+        } catch (err) {
+            console.error('Erreur lors de l\'ajout des affectations !', err);
+            setError('Erreur lors de l\'ajout des affectations.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -99,50 +165,57 @@ const AddModule_niveau = () => {
             <Col>
                 <Card>
                     <CardTitle tag="h6" className="border-bottom p-3 mb-0">
-                        Ajouter une affectation
+                        Ajouter des affectations
                     </CardTitle>
                     <CardBody>
-                        <Form onSubmit={handleSubmit}>
-                            <FormGroup>
-                                <Label for="id_niveau">Niveau</Label>
-                                <Input
-                                    id="id_niveau"
-                                    name="id_niveau"
-                                    type="select"
-                                    value={formData.id_niveau}
-                                    onChange={handleChange}
-                                    required
-                                >
-                                    <option value="">Sélectionnez un niveau</option>
+                        {loading ? (
+                            <div className="text-center">
+                                <Spinner color="primary" />
+                            </div>
+                        ) : (
+                            <Form onSubmit={handleSubmit}>
+                                <FormGroup>
+                                    <Label for="id_module">Module</Label>
+                                    <Input
+                                        id="id_module"
+                                        name="id_module"
+                                        type="select"
+                                        value={formData.id_module}
+                                        onChange={handleChange}
+                                        required
+                                    >
+                                        <option value="">Sélectionnez un module</option>
+                                        {modules.map(module => (
+                                            <option key={module.id_module} value={module.id_module}>
+                                                {module.nom_module}
+                                            </option>
+                                        ))}
+                                    </Input>
+                                </FormGroup>
+
+                                <FormGroup>
+                                    <Label>Niveaux</Label>
                                     {niveaux.map(niveau => (
-                                        <option key={niveau.id_niveau} value={niveau.id_niveau}>
-                                            {niveau.libelleNiv}  {/* Utilisez le nom du niveau ici */}
-                                        </option>
+                                        <FormGroup check key={niveau.id_niveau}>
+                                            <Label check>
+                                                <Input
+                                                    type="checkbox"
+                                                    name="id_niveaux"
+                                                    value={niveau.id_niveau}
+                                                    checked={formData.id_niveaux.includes(niveau.id_niveau)}
+                                                    onChange={handleChange}
+                                                    className="custom-checkbox"  // Apply custom class
+                                                />
+                                                {niveau.libelleNiv}
+                                            </Label>
+                                        </FormGroup>
                                     ))}
-                                </Input>
-                            </FormGroup>
+                                </FormGroup>
 
-                            <FormGroup>
-                                <Label for="id_module">Module</Label>
-                                <Input
-                                    id="id_module"
-                                    name="id_module"
-                                    type="select"
-                                    value={formData.id_module}
-                                    onChange={handleChange}
-                                    required
-                                >
-                                    <option value="">Sélectionnez un module</option>
-                                    {modules.map(module => (
-                                        <option key={module.id_module} value={module.id_module}>
-                                            {module.nom_module}  {/* Utilisez le nom du module ici */}
-                                        </option>
-                                    ))}
-                                </Input>
-                            </FormGroup>
-
-                            <Button type="submit">Ajouter l'affectation</Button>
-                        </Form>
+                                <Button type="submit" color="primary">Ajouter les affectations</Button>
+                                {error && <p className="text-danger mt-2">{error}</p>}
+                            </Form>
+                        )}
                     </CardBody>
                 </Card>
                 <Link to="/Module_niveau-list">
