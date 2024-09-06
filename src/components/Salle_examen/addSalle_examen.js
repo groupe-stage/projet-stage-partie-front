@@ -30,70 +30,89 @@ const getCookie = (name) => {
     return cookieValue;
 };
 
-const AddSalle_examen = () => {
+const AddSallex = () => {
     const [formData, setFormData] = useState({
-        id_salle: '',
-        id_examen: '',
-        date_salle:''
+        id_salles: [], // Utilisation d'un tableau pour plusieurs salles
+        id_examen: ''
     });
 
-  const [salles, setSalles] = useState([]);
-  const [examens, setExamens] = useState([]);
+    const [salles, setSalles] = useState([]);
+    const [examens, setExamens] = useState([]);
 
     useEffect(() => {
-        // Récupérer les données des modules
+        // Récupérer les données des salles
         axios.get('http://127.0.0.1:8000/salle/displayAllS')
             .then(response => {
                 setSalles(response.data);
             })
             .catch(error => {
-                console.error('Il y a eu une erreur lors de la récupération des salles!', error);
+                console.error('Erreur lors de la récupération des salles:', error);
             });
 
-        // Récupérer les données des niveaux
-        axios.get('http://127.0.0.1:8000/examen/displayall')
+        // Récupérer les données des examens
+        axios.get('http://127.0.0.1:8000/examen/displayall/')
             .then(response => {
                 setExamens(response.data);
             })
             .catch(error => {
-                console.error('Il y a eu une erreur lors de la récupération des examens!', error);
+                console.error('Erreur lors de la récupération des examens:', error);
             });
     }, []);
 
-    // Fonction pour gérer les changements dans le formulaire
+    // Gérer les changements du formulaire
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({
-            ...formData,
-            [name]: value
-        });
+        const { name, value, checked } = e.target;
+        if (name === 'id_salles') {
+            if (checked) {
+                // Ajouter l'id_salle à la liste des salles sélectionnées
+                setFormData(prevState => ({
+                    ...prevState,
+                    id_salles: [...prevState.id_salles, value]
+                }));
+            } else {
+                // Retirer l'id_salle de la liste des salles sélectionnées
+                setFormData(prevState => ({
+                    ...prevState,
+                    id_salles: prevState.id_salles.filter(id => id !== value)
+                }));
+            }
+        } else {
+            setFormData({
+                ...formData,
+                [name]: value
+            });
+        }
     };
 
     const navigate = useNavigate();
-    
-    // Fonction pour gérer la soumission du formulaire
+
+    // Gérer la soumission du formulaire
     const handleSubmit = (e) => {
         e.preventDefault();
         const csrftoken = getCookie('csrftoken');
 
-        axios.post('http://127.0.0.1:8000/Salle_examen/addSalle_examen/', formData, {
-            headers: {
-                'X-CSRFToken': csrftoken
-            }
-        })
-        .then(response => {
-            alert('Affectation ajoutée avec succès !');
-            navigate('/Salle_examen-list');
-            setFormData({
-                id_salle: '',
-                id_examen: '',
-                date_salle:''
+        // Soumettre chaque salle individuellement
+        const promises = formData.id_salles.map(id_salle =>
+            axios.post('http://127.0.0.1:8000/sallex/add/', { id_salle, id_examen: formData.id_examen }, {
+                headers: {
+                    'X-CSRFToken': csrftoken
+                }
+            })
+        );
+
+        Promise.all(promises)
+            .then(() => {
+                alert('Affectations ajoutées avec succès !');
+                navigate('/sallex-list');
+                setFormData({
+                    id_salles: [],
+                    id_examen: ''
+                });
+            })
+            .catch(error => {
+                console.error('Erreur lors de l\'ajout des affectations:', error);
+                alert('Échec de l\'ajout des affectations.');
             });
-        })
-        .catch(error => {
-            console.error('Il y a eu une erreur lors de l\'ajout de l\'affectation !', error);
-            alert('Erreur lors de l\'ajout de l\'affectation.');
-        });
     };
 
     return (
@@ -106,22 +125,22 @@ const AddSalle_examen = () => {
                     <CardBody>
                         <Form onSubmit={handleSubmit}>
                             <FormGroup>
-                                <Label for="id_salle">Salle</Label>
-                                <Input
-                                    id="id_salle"
-                                    name="id_salle"
-                                    type="select"
-                                    value={formData.id_salle}
-                                    onChange={handleChange}
-                                    required
-                                >
-                                    <option value="">Sélectionnez une salle</option>
-                                    {salles.map(salle => (
-                                        <option key={salle.id_salle} value={salle.id_salle}>
-                                            {salle.nom_salle}  {/* Utilisez le nom du niveau ici */}
-                                        </option>
-                                    ))}
-                                </Input>
+                                <Label for="id_salles">Salles</Label>
+                                {salles.map(salle => (
+                                    <FormGroup check key={salle.id_salle}>
+                                        <Label check>
+                                            <Input
+                                                id={`salle-${salle.id_salle}`}
+                                                name="id_salles"
+                                                type="checkbox"
+                                                value={salle.id_salle}
+                                                checked={formData.id_salles.includes(salle.id_salle.toString())}
+                                                onChange={handleChange}
+                                            />
+                                            {salle.nom_salle}
+                                        </Label>
+                                    </FormGroup>
+                                ))}
                             </FormGroup>
                            
                             <FormGroup>
@@ -134,24 +153,13 @@ const AddSalle_examen = () => {
                                     onChange={handleChange}
                                     required
                                 >
-                                    <option value="">Sélectionnez un examen</option>
+                                    <option value="">Sélectionner un examen</option>
                                     {examens.map(examen => (
                                         <option key={examen.id_examen} value={examen.id_examen}>
-                                            {examen.nom_examen}  {/* Utilisez le nom du module ici */}
+                                            {examen.nom_examen}
                                         </option>
                                     ))}
                                 </Input>
-                            </FormGroup>
-                            <FormGroup>
-                                <Label for="date_salle">Date</Label>
-                                <Input
-                                    id="date_salle"
-                                    name="date_salle"
-                                    type="date"
-                                    value={formData.date_salle}
-                                    onChange={handleChange}
-                                    required
-                                />
                             </FormGroup>
                             <Button type="submit">Ajouter l'affectation</Button>
                         </Form>
@@ -167,4 +175,4 @@ const AddSalle_examen = () => {
     );
 };
 
-export default AddSalle_examen;
+export default AddSallex;

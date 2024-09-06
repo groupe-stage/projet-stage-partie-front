@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Row, Col, Table, Card, CardTitle, CardBody, Button, ButtonGroup } from 'reactstrap';
-import { FaEdit, FaTrashAlt, FaPlus } from 'react-icons/fa';
+import { Row, Col, Table, Card, CardTitle, CardBody, Button, ButtonGroup, FormGroup, Input } from 'reactstrap';
+import { FaEdit, FaTrashAlt, FaPlus, FaSortAlphaDown, FaSortAlphaUp } from 'react-icons/fa';
 import './UserList.css'; // Ensure to include your CSS file
 import { Link } from 'react-router-dom';
 
@@ -9,6 +9,10 @@ const UserList = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [units, setUnits] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortField, setSortField] = useState('');
+  const [sortOrder, setSortOrder] = useState('asc'); // 'asc' ou 'desc'
 
   useEffect(() => {
     axios.get('http://127.0.0.1:8000/api/displayall')
@@ -37,7 +41,31 @@ const UserList = () => {
     const unit = units.find(unit => unit.id_unite === id);
     return unit ? unit.nom_unite : '';
   };
+  useEffect(() => {
+    const filtered = users.filter(user =>
+      user.username.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
+    const sorted = filtered.sort((a, b) => {
+      if (sortField) {
+        if (a[sortField] < b[sortField]) return sortOrder === 'asc' ? -1 : 1;
+        if (a[sortField] > b[sortField]) return sortOrder === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+
+    setFilteredUsers(sorted);
+  }, [searchQuery, sortField, sortOrder, users]);
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const handleSort = (field) => {
+    const newOrder = (sortField === field && sortOrder === 'asc') ? 'desc' : 'asc';
+    setSortField(field);
+    setSortOrder(newOrder);
+  };
   const handleDelete = (id) => {
     console.log(`Supprimer l'utilisateur avec l'ID : ${id}`);
     // Implémentez la fonctionnalité de suppression ici
@@ -61,6 +89,19 @@ const UserList = () => {
             Liste des utilisateurs
           </CardTitle>
           <CardBody>
+          <FormGroup className="mb-3">
+              <Input
+                type="text"
+                placeholder="Rechercher par utilisateur"
+                value={searchQuery}
+                onChange={handleSearchChange}
+              />
+            </FormGroup>
+            <div className="mb-3">
+              <Button color="secondary" onClick={() => handleSort('username')}>
+                Nom d'utilisateur {sortField === 'username' && (sortOrder === 'asc' ? <FaSortAlphaUp /> : <FaSortAlphaDown />)}
+              </Button>
+            </div>
             <Table className="modern-table" responsive>
               <thead>
                 <tr>
@@ -77,7 +118,7 @@ const UserList = () => {
                 </tr>
               </thead>
               <tbody>
-                {users.map(user => (
+                {filteredUsers.map(user => (
                   <tr key={user.user_id}>
                     <td>
                       <img 

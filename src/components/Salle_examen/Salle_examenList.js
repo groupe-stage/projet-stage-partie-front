@@ -2,41 +2,61 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Row, Col, Table, Card, CardTitle, CardBody, Button, ButtonGroup } from 'reactstrap';
 import { FaTrashAlt, FaPlus } from 'react-icons/fa';
-import './Salle_examenList.css'; // Ensure to include your CSS file
 import { Link } from 'react-router-dom';
 
-const Salle_examenList = () => {
-  const [salle_examen, setSalle_examen] = useState([]);
+// Function to get the value of a cookie by its name
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.startsWith(name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+// Default Axios configuration for CSRF
+axios.defaults.xsrfCookieName = 'csrftoken';
+axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+axios.defaults.withCredentials = true;
+
+const SallexList = () => {
+  const [sallex, setSallex] = useState([]);
   const [salles, setSalles] = useState([]);
   const [examens, setExamens] = useState([]);
 
   useEffect(() => {
-    // Récupérer les données de Module_niveau
-    axios.get('http://127.0.0.1:8000/Salle_examen/displayall/')
+    // Fetch data for Sallex
+    axios.get('http://127.0.0.1:8000/sallex/all/')
       .then(response => {
-        setSalle_examen(response.data);
+        setSallex(response.data);
       })
       .catch(error => {
-        console.error("Il y a eu une erreur!", error);
+        console.error("There was an error fetching sallex data!", error);
       });
 
-    // Récupérer les données des modules
+    // Fetch data for salles
     const fetchSalles = async () => {
       try {
         const response = await axios.get('http://127.0.0.1:8000/salle/displayAllS');
         setSalles(response.data);
       } catch (error) {
-        console.error("Erreur lors de la récupération des salles:", error);
+        console.error("Error fetching salles:", error);
       }
     };
 
-    // Récupérer les données des niveaux
+    // Fetch data for examens
     const fetchExamens = async () => {
       try {
         const response = await axios.get('http://127.0.0.1:8000/examen/displayall/');
         setExamens(response.data);
       } catch (error) {
-        console.error("Erreur lors de la récupération des examens:", error);
+        console.error("Error fetching examens:", error);
       }
     };
 
@@ -44,26 +64,39 @@ const Salle_examenList = () => {
     fetchSalles();
   }, []);
 
-  // Fonction pour obtenir le nom du module par ID
+  // Function to get Salle name by ID
   const getSalleNameById = (id) => {
     const salle = salles.find(salle => salle.id_salle === id);
-    return salle ? salle.nom_salle : 'Inconnu';
+    return salle ? salle.nom_salle : 'Unknown';
   };
 
-  // Fonction pour obtenir le nom du niveau par ID
+  // Function to get Examen name by ID
   const getExamenNameById = (id) => {
     const examen = examens.find(examen => examen.id_examen === id);
-    return examen ? examen.nom_examen : 'Inconnu';
+    return examen ? examen.nom_examen : 'Unknown';
   };
 
-  // Fonction pour gérer la suppression
-  const handleDelete = (id_module, id_niveau) => {
-    console.log(`Supprimer l'affectation avec ID Module: ${id_module} et ID Niveau: ${id_niveau}`);
+  // Function to handle delete
+  const handleDelete = async (idse) => {
+    try {
+      const csrftoken = getCookie('csrftoken'); // Get the CSRF token from the cookie
+
+      await axios.delete(`http://127.0.0.1:8000/sallex/delete/${idse}/`, {
+        headers: {
+          'X-CSRFToken': csrftoken // Include the CSRF token in the headers
+        }
+      });
+
+      console.log(`Deleted assignment with ID: ${idse}`);
+      setSallex(sallex.filter(item => item.idse !== idse)); // Update state to remove deleted item
+    } catch (error) {
+      console.error("There was an error deleting the assignment!", error);
+    }
   };
 
-  // Fonction pour ajouter une nouvelle affectation
+  // Function to handle add
   const handleAdd = () => {
-    console.log('Ajouter une nouvelle affectation');
+    console.log('Add new assignment');
   };
 
   return (
@@ -71,7 +104,7 @@ const Salle_examenList = () => {
       <Col lg="12">
         <Card>
           <CardTitle tag="h6" className="border-bottom p-3 mb-0">
-            Liste des affectations des examens aux salles
+            List of Exam Assignments to Rooms
           </CardTitle>
           <CardBody>
             <Table className="modern-table" responsive>
@@ -79,23 +112,19 @@ const Salle_examenList = () => {
                 <tr>
                   <th>Salle</th>
                   <th>Examen</th>
-                  <th>Date</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {salle_examen.map((item) => (
-                  <tr key={`${item.id_salle}-${item.id_examen}`}>
+                {sallex.map((item) => (
+                  <tr key={item.idse}>
                     <td>{getSalleNameById(item.id_salle)}</td>
                     <td>{getExamenNameById(item.id_examen)}</td>
-                    <td>{item.date_salle}</td>
                     <td>
                       <ButtonGroup>
-                        <Link to={`/Salle_examen-del/${item.id_salle}`}>
-                          <Button color="dark" onClick={() => handleDelete(item.id_salle, item.id_examen)}>
-                            <FaTrashAlt />
-                          </Button>
-                        </Link>
+                        <Button color="dark" onClick={() => handleDelete(item.idse)}>
+                          <FaTrashAlt />
+                        </Button>
                       </ButtonGroup>
                     </td>
                   </tr>
@@ -105,7 +134,7 @@ const Salle_examenList = () => {
             <div className="text-center mt-3">
               <Link to="/addSalle_examen">
                 <Button color="secondary" onClick={handleAdd}>
-                  <FaPlus /> Ajouter une affectation
+                  <FaPlus /> Add Assignment
                 </Button>
               </Link>
             </div>
@@ -116,4 +145,4 @@ const Salle_examenList = () => {
   );
 };
 
-export default Salle_examenList;
+export default SallexList;

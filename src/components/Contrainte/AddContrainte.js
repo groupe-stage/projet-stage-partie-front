@@ -29,7 +29,7 @@ const AddContrainte = () => {
         date_debut_contrainte: '',
         date_fin_contrainte: '',
         status_contrainte: '',
-        id_user: ''
+        user: ''
     });
 
     const [users, setUsers] = useState([]);
@@ -39,12 +39,12 @@ const AddContrainte = () => {
     useEffect(() => {
         // Fetch users data
         axios.get('http://127.0.0.1:8000/api/displayall')  // Adjust the endpoint as needed
-            .then(response => {
-                setUsers(response.data);
-            })
-            .catch(error => {
-                console.error("Erreur lors de la récupération des utilisateurs!", error);
-            });
+        .then(response => {
+            setUsers(response.data);  // Ensure the response contains an array of users
+        })
+        .catch(error => {
+            console.error('Erreur lors de la récupération des utilisateurs!', error);
+        });
     }, []);
 
     const handleChange = (e) => {
@@ -73,7 +73,7 @@ const AddContrainte = () => {
                     date_debut_contrainte: '',
                     date_fin_contrainte: '',
                     status_contrainte: '',
-                    id_user: ''
+                    user: ''
                 });
             })
             .catch(error => {
@@ -145,23 +145,23 @@ const AddContrainte = () => {
                                 />
                             </FormGroup>
                             <FormGroup>
-                                <Label for="id_user">Utilisateur</Label>
-                                <Input
-                                    id="id_user"
-                                    name="id_user"
-                                    type="select"
-                                    value={formData.id_user}
-                                    onChange={handleChange}
-                                    required
-                                >
-                                    <option value="">Sélectionnez un utilisateur</option>
-                                    {users.map(user => (
-                                        <option key={user.id} value={user.id}>
-                                            {user.user_id}
-                                        </option>
-                                    ))}
-                                </Input>
-                            </FormGroup>
+    <Label for="user">Nom d'utilisateur</Label>
+    <Input
+        id="user"
+        name="user"
+        type="select"
+        value={formData.user}
+        onChange={handleChange}
+        required
+    >
+        <option value="">Sélectionnez un utilisateur</option>
+        {users.map(user => (
+            <option key={user.user_id} value={user.user_id}>
+                {user.username}  
+            </option>
+        ))}
+    </Input>
+</FormGroup>
                             <Button type="submit">Ajouter la Contrainte</Button>
                         </Form>
                     </CardBody>

@@ -89,15 +89,18 @@ const AddUser = () => {
 
         const dataToSend = new FormData();
         Object.keys(formData).forEach(key => {
-            dataToSend.append(key, formData[key]);
+            // Ajouter uniquement les champs non vides
+            if (formData[key] !== '' && formData[key] !== null) {
+                dataToSend.append(key, formData[key]);
+            }
         });
 
         // Réinitialisation des champs spécifiques si le rôle est "employe"
         if (formData.role === 'employe') {
-            dataToSend.set('roleRes', '');
-            dataToSend.set('quota', '');
-            dataToSend.set('identifiant', '');
-            dataToSend.set('id_unite', '');
+            dataToSend.delete('roleRes');
+            dataToSend.delete('quota');
+            dataToSend.delete('identifiant');
+            dataToSend.delete('id_unite');
         }
 
         const csrftoken = getCookie('csrftoken');

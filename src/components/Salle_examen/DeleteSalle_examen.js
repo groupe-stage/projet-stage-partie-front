@@ -3,14 +3,14 @@ import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from 'reactstrap';
 
-// Fonction pour obtenir la valeur d'un cookie par son nom
+// Function to get the value of a cookie by its name
 function getCookie(name) {
   let cookieValue = null;
   if (document.cookie && document.cookie !== '') {
     const cookies = document.cookie.split(';');
     for (let i = 0; i < cookies.length; i++) {
       const cookie = cookies[i].trim();
-      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+      if (cookie.startsWith(name + '=')) {
         cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
         break;
       }
@@ -19,41 +19,42 @@ function getCookie(name) {
   return cookieValue;
 }
 
-// Configuration par défaut pour Axios pour inclure le cookie CSRF
+// Default Axios configuration for CSRF
 axios.defaults.xsrfCookieName = 'csrftoken';
 axios.defaults.xsrfHeaderName = 'X-CSRFToken';
 axios.defaults.withCredentials = true;
 
-const DeleteSalle_examen = () => {
-  const { id_salle } = useParams(); // Récupère l'ID du module depuis les paramètres de l'URL
-  const navigate = useNavigate(); // Utilise le hook navigate pour rediriger l'utilisateur après la suppression
+const DeleteSallex = () => {
+  const { idse } = useParams(); // Get the ID of the Sallex from URL params
+  const navigate = useNavigate(); // Use navigate hook to redirect after deletion
 
-  // Fonction pour gérer la suppression
+  // Function to handle delete
   const handleDelete = async () => {
     try {
-      const csrftoken = getCookie('csrftoken'); // Obtient le token CSRF du cookie
+      const csrftoken = getCookie('csrftoken'); // Get CSRF token from cookie
 
-      await axios.delete(`http://127.0.0.1:8000/Salle_examen/deleteSalle_examen/${id_salle}/`, {
+      await axios.delete(`http://127.0.0.1:8000/sallex/delete/${idse}/`, {
         headers: {
-          'X-CSRFToken': csrftoken // Inclut le token CSRF dans les en-têtes
+          'X-CSRFToken': csrftoken // Include CSRF token in headers
         }
       });
-      alert('Affectation supprimée avec succès !');
-      navigate('/Salle_examen-list'); // Redirige vers la liste des affectations
+
+      alert('Assignment deleted successfully!');
+      navigate('/Sallex-list'); // Redirect after successful deletion
     } catch (error) {
-      console.error('Erreur lors de la suppression de l\'affectation:', error);
-      alert('Échec de la suppression de l\'affectation.');
+      console.error('Error deleting assignment:', error.response || error);
+      alert('Failed to delete assignment.');
     }
   };
 
   return (
     <div>
-      <h2>Êtes-vous sûr de vouloir supprimer cette affectation ?</h2>
+      <h2>Are you sure you want to delete this assignment?</h2>
       <Button color="danger" onClick={handleDelete}>
-        Supprimer
+        Delete
       </Button>
     </div>
   );
 };
 
-export default DeleteSalle_examen;
+export default DeleteSallex;
