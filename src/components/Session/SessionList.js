@@ -3,10 +3,13 @@ import axios from 'axios';
 import { Row, Col, Table, Card, CardTitle, CardBody, Button, ButtonGroup, FormGroup, Input } from 'reactstrap';
 import { FaEdit, FaTrashAlt, FaPlus, FaSortAlphaDown, FaSortAlphaUp } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
-import './SessionList.css'; 
+import './SessionList.css';
+
+// Configurer Axios pour inclure le token CSRF
 axios.defaults.xsrfCookieName = 'csrftoken';
 axios.defaults.xsrfHeaderName = 'X-CSRFToken';
 axios.defaults.withCredentials = true;
+
 const SessionList = () => {
   const [sessions, setSessions] = useState([]);
   const [filteredSessions, setFilteredSessions] = useState([]);
@@ -20,8 +23,6 @@ const SessionList = () => {
         setSessions(response.data);
       })
       .catch(error => {
-        console.log(error);
-
         console.error("Il y a eu une erreur lors de la récupération des sessions!", error);
       });
   }, []);
