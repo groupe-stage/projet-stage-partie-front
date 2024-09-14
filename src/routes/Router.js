@@ -12,6 +12,9 @@ const LoadingScreenTest = lazy(() => import("../views/LoadingScreenTest.js"));
 /***** Pages ****/
 const Starter = lazy(() => import("../views/Starter.js"));
 const Login = lazy(() => import("../components/dashboard/login.js"));
+const ForgotPassword = lazy(() => import("../components/dashboard/ForgotPassword.js"));
+const ResetPassword = lazy(() => import("../components/dashboard/ResetPassword.js"));
+
 
 const AddUser = lazy(() => import("../components/Users/addUser.js"));
 const UserList = lazy(() => import("../components/Users/UserList.js"));
@@ -108,7 +111,10 @@ const ThemeRoutes = [
     children: [
       { path: "/", element: <Navigate to="/login" /> },
       { path: "/starter", element: <Starter /> },
-     
+      { path: "/forgot-password", element: <ForgotPassword /> },
+      { path: "reset-password/:user_id/:token/", element: <ResetPassword /> },
+
+
       { path: "/addUser", element: <AddUser /> },
       { path: "/user-list", exact: true, element:<UserList /> }, // Ajouter la route ici
       { path: "/user-up/:user_id", exact: true, element:< UserUpdate/> }, // Ajouter la route ici

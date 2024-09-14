@@ -85,7 +85,13 @@ const Sidebar = () => {
       .then((res) => {
         const user = res.data.user;
         setCurrentUser(user);
-        setRole(user.role);  // Supposons que le rôle soit dans "user.role"
+        
+        // Vérifiez si l'utilisateur est un enseignant avec roleRes = 'directeur'
+        if (user.role === "enseignant" && user.roleRes === "directeur") {
+          setRole("employe");  // Donnez-lui les mêmes droits qu'un employé
+        } else {
+          setRole(user.role);  // Sinon, utilisez le rôle de l'utilisateur
+        }
       })
       .catch((error) => {
         console.error("Error fetching user info:", error.response ? error.response.data : error.message);
