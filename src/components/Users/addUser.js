@@ -53,6 +53,7 @@ const AddUser = () => {
   // État pour stocker les unités récupérées de l'API
   const [units, setUnits] = useState([]);
   const [cinError, setCinError] = useState('');
+  const [identifiantError, setIdentifiantError] = useState('');
   const [fieldsRequired, setFieldsRequired] = useState({
     quota: false,
     identifiant: false,
@@ -71,8 +72,44 @@ const AddUser = () => {
       });
   }, []);
 
+  // Fonction pour vérifier l'unicité du CIN
+const checkCinUniqueness = async (cin) => {
+  try {
+    // Effectuer une requête pour obtenir tous les utilisateurs
+    const response = await axios.get('http://127.0.0.1:8000/api/displayall/');
+    
+    // Vérifier si le CIN existe parmi les utilisateurs
+    const users = response.data; // Assurez-vous que cette réponse contient la liste des utilisateurs
+    const cinExists = users.some(user => user.cin === cin); // Remplacez `cin` par le champ correspondant si nécessaire
+    
+    return !cinExists;
+  } catch (error) {
+    console.error('Erreur lors de la vérification du CIN', error);
+    return false;
+  }
+};
+
+
+  // Fonction pour vérifier l'unicité de l'identifiant
+const checkIdentifiantUniqueness = async (identifiant) => {
+  try {
+    // Effectuer une requête pour obtenir tous les utilisateurs
+    const response = await axios.get('http://127.0.0.1:8000/api/displayall/');
+    
+    // Vérifier si l'identifiant existe parmi les utilisateurs
+    const users = response.data; // Assurez-vous que cette réponse contient la liste des utilisateurs
+    const identifiantExists = users.some(user => user.identifiant === identifiant); // Remplacez `identifiant` par le champ correspondant si nécessaire
+    
+    return !identifiantExists;
+  } catch (error) {
+    console.error('Erreur lors de la vérification de l\'identifiant', error);
+    return false;
+  }
+};
+
+
   // Gestion du changement des champs du formulaire
-  const handleInputChange = (e) => {
+  const handleInputChange = async (e) => {
     const { name, value } = e.target;
 
     setFormData((prevData) => {
@@ -87,8 +124,29 @@ const AddUser = () => {
           if (value.length < 8) {
             setCinError('Le CIN doit contenir exactement 8 chiffres.');
           } else {
-            setCinError(''); // Aucune erreur si la longueur est correcte
+            checkCinUniqueness(value).then(isUnique => {
+              if (!isUnique) {
+                setCinError('Ce CIN est déjà utilisé.');
+              } else {
+                setCinError('');
+              }
+            });
           }
+        } else {
+          setCinError('Le CIN doit être un nombre de 8 chiffres.');
+        }
+      }
+
+      // Validation pour l'identifiant
+      if (name === 'identifiant') {
+        if (/^\S+$/.test(value)) {
+          checkIdentifiantUniqueness(value).then(isUnique => {
+            if (!isUnique) {
+              setIdentifiantError('Cet identifiant est déjà utilisé.');
+            } else {
+              setIdentifiantError('');
+            }
+          });
         }
       }
 
@@ -148,15 +206,17 @@ const AddUser = () => {
   const navigate = useNavigate();
 
   // Gestion de la soumission du formulaire
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if ((formData.cin.length > 8)&&(formData.cin.length < 8)) {
+    if ((formData.cin.length > 8) || (formData.cin.length < 8)) {
       setCinError('Le CIN doit contenir exactement 8 chiffres.');
       return; // Empêche l'envoi du formulaire si le CIN est invalide
     }
 
-    setCinError('');
+    if (cinError || identifiantError) {
+      return; // Empêche l'envoi du formulaire si des erreurs sont présentes
+    }
 
     const dataToSend = new FormData();
     Object.keys(formData).forEach((key) => {
@@ -168,32 +228,30 @@ const AddUser = () => {
 
     const csrftoken = getCookie('csrftoken');
 
-    axios
-      .post('http://127.0.0.1:8000/api/register', dataToSend, {
+    try {
+      await axios.post('http://127.0.0.1:8000/api/register', dataToSend, {
         headers: {
           'X-CSRFToken': csrftoken,
         },
-      })
-      .then((response) => {
-        alert('Utilisateur ajouté avec succès!');
-        navigate('/user-list');
-        setFormData({
-          username: '',
-          email: '',
-          password: '',
-          cin: '',
-          quota: '',
-          role: '',
-          identifiant: '',
-          roleRes: '',
-          id_unite: '',
-          image_user: null,
-        });
-      })
-      .catch((error) => {
-        console.error("Erreur lors de l'ajout de l'utilisateur!", error);
-        alert("Erreur lors de l'ajout de l'utilisateur.");
       });
+      alert('Utilisateur ajouté avec succès!');
+      navigate('/user-list');
+      setFormData({
+        username: '',
+        email: '',
+        password: '',
+        cin: '',
+        quota: '',
+        role: '',
+        identifiant: '',
+        roleRes: '',
+        id_unite: '',
+        image_user: null,
+      });
+    } catch (error) {
+      console.error("Erreur lors de l'ajout de l'utilisateur!", error);
+      alert("Erreur lors de l'ajout de l'utilisateur.");
+    }
   };
 
   return (
@@ -320,6 +378,7 @@ const AddUser = () => {
                     type="text"
                     required
                   />
+                  {identifiantError && <span className="text-danger">{identifiantError}</span>}
                 </FormGroup>
               )}
               {fieldsRequired.id_unite && (
@@ -355,7 +414,7 @@ const AddUser = () => {
         </Card>
       </Col>
     </Row>
-  );
-};
-
-export default AddUser;
+    );
+  };
+  
+  export default AddUser;

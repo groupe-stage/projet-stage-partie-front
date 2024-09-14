@@ -8,7 +8,6 @@ import { Link } from 'react-router-dom';
 const SalleList = () => {
   const [salles, setSalles] = useState([]);
   const [blocs, setBlocs] = useState([]);
-  const [examens, setExamens] = useState([]);
 
   useEffect(() => {
     const fetchSalles = async () => {
@@ -29,18 +28,11 @@ const SalleList = () => {
       }
     };
 
-    const fetchExamens = async () => {
-      try {
-        const response = await axios.get('http://127.0.0.1:8000/examen/displayall');
-        setExamens(response.data);
-      } catch (error) {
-        console.error("Erreur lors de la récupération des examens:", error);
-      }
-    };
+   
+    
 
     fetchSalles();
     fetchBlocs();
-    fetchExamens();
   }, []);
 
   const handleDelete = (id) => {
@@ -64,12 +56,7 @@ const SalleList = () => {
     return bloc ? bloc.nom_bloc : 'Unknown';
   };
 
-  // Function to get exam name by ID
-  const getExamNameById = (id) => {
-    const exam = examens.find(exam => exam.id_examen === id);
-    return exam ? exam.nom_examen : 'Unknown';
-  };
-
+ 
   return (
     <Row>
       <Col lg="12">
@@ -86,7 +73,6 @@ const SalleList = () => {
                   <th>Capacité</th>
                   <th>Disponibilité</th>
                   <th>Bloc</th>
-                  <th>Examen</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -97,7 +83,6 @@ const SalleList = () => {
                     <td>{salle.capacite}</td>
                     <td>{salle.dispo ? 'Oui' : 'Non'}</td>
                     <td>{getBlocNameById(salle.id_bloc)}</td>
-                    <td>{getExamNameById(salle.id_examen)}</td>
                     <td>
                       <ButtonGroup>
                         <Link to={`/salle-up/${salle.id_salle}`}>

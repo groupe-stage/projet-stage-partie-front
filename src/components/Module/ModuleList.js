@@ -8,7 +8,6 @@ import './ModuleList.css'; // Assurez-vous d'inclure votre fichier CSS
 
 const ModuleList = () => {
   const [modules, setModules] = useState([]);
-  const [niveaux, setNiveaux] = useState([]);
   const [filteredModules, setFilteredModules] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortField, setSortField] = useState('');
@@ -24,14 +23,7 @@ const ModuleList = () => {
         console.error("Il y a eu une erreur lors de la récupération des modules!", error);
       });
 
-    // Récupérer tous les niveaux
-    axios.get('http://127.0.0.1:8000/Niveau/displayallNiveaux/')
-      .then(response => {
-        setNiveaux(response.data);
-      })
-      .catch(error => {
-        console.error("Il y a eu une erreur lors de la récupération des niveaux!", error);
-      });
+   
   }, []);
 
   useEffect(() => {
@@ -77,11 +69,8 @@ const ModuleList = () => {
     console.log('Ajouter un nouveau module');
   };
 
-  // Fonction pour obtenir le libelleNiv basé sur id_niveau
-  const getLibelleNiv = (id) => {
-    const niveau = niveaux.find(niveau => niveau.id_niveau === id);
-    return niveau ? niveau.libelleNiv : 'Inconnu';
-  };
+ 
+  
 
   return (
     <Row>
@@ -110,7 +99,6 @@ const ModuleList = () => {
                 <tr>
                   <th>Nom du module</th>
                   <th>Durée du module (en heure)</th>
-                  <th>Niveau</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -119,7 +107,6 @@ const ModuleList = () => {
                   <tr key={module.id_module}>
                     <td>{module.nom_module}</td>
                     <td>{module.duree_module}</td>
-                    <td>{getLibelleNiv(module.id_niveau)}</td>
                     <td>
                       <ButtonGroup>
                         <Link to={`/module-up/${module.id_module}`}>

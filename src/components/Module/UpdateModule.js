@@ -26,10 +26,8 @@ const UpdateModule = () => {
   const [moduleData, setModuleData] = useState({
     nom_module: '',
     duree_module: '',
-    id_niveau: '',
   });
 
-  const [niveaux, setNiveaux] = useState([]);
   const [message, setMessage] = useState('');
   const { id_module } = useParams();
   const navigate = useNavigate();
@@ -46,17 +44,8 @@ const UpdateModule = () => {
       }
     };
 
-    const fetchNiveaux = async () => {
-      try {
-        const response = await axios.get('http://127.0.0.1:8000/Niveau/displayallNiveaux/');
-        setNiveaux(response.data);
-      } catch (error) {
-        console.error('Erreur lors de la récupération des niveaux:', error);
-      }
-    };
-
+   
     fetchModule();
-    fetchNiveaux();
   }, [id_module]);
 
   const handleChange = (e) => {
@@ -106,33 +95,21 @@ const UpdateModule = () => {
                 />
               </FormGroup>
               <FormGroup>
-                <Label for="duree_module">Durée (en heures)</Label>
-                <Input
-                  id="duree_module"
-                  name="duree_module"
-                  value={moduleData.duree_module}
-                  onChange={handleChange}
-                  required
-                />
-              </FormGroup>
-              <FormGroup>
-                <Label for="id_niveau">Niveau</Label>
-                <Input
-                  type="select"
-                  id="id_niveau"
-                  name="id_niveau"
-                  value={moduleData.id_niveau}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Sélectionnez un niveau</option>
-                  {niveaux.map(niveau => (
-                    <option key={niveau.id_niveau} value={niveau.id_niveau}>
-                      {niveau.libelleNiv}
-                    </option>
-                  ))}
-                </Input>
-              </FormGroup>
+  <Label for="duree_module">Durée (en heures)</Label>
+  <Input
+    id="duree_module"
+    name="duree_module"
+    type="select"
+    value={moduleData.duree_module}
+    onChange={handleChange}
+    required
+  >
+    <option value="">Sélectionnez une durée (en heure )</option>
+    <option value="21">21 </option>
+    <option value="42">42 </option>
+  </Input>
+</FormGroup>
+             
               <Button type="submit">Mettre à jour le module</Button>
             </Form>
           </CardBody>
