@@ -24,7 +24,7 @@ axios.defaults.xsrfCookieName = 'csrftoken';
 axios.defaults.xsrfHeaderName = 'X-CSRFToken';
 axios.defaults.withCredentials = true;
 
-const DeleteModule_niveau = () => {
+const DeleteModuleNiveau = () => {
   const { id_module } = useParams(); // Récupère l'ID du module depuis les paramètres de l'URL
   const navigate = useNavigate(); // Utilise le hook navigate pour rediriger l'utilisateur après la suppression
 
@@ -41,7 +41,7 @@ const DeleteModule_niveau = () => {
       alert('Affectation supprimée avec succès !');
       navigate('/Module_niveau-list'); // Redirige vers la liste des affectations
     } catch (error) {
-      console.error('Erreur lors de la suppression de l\'affectation:', error);
+      console.error('Erreur lors de la suppression de l\'affectation :', error);
       alert('Échec de la suppression de l\'affectation.');
     }
   };
@@ -56,4 +56,4 @@ const DeleteModule_niveau = () => {
   );
 };
 
-export default DeleteModule_niveau;
+export default DeleteModuleNiveau;

@@ -52,18 +52,19 @@ const Header = () => {
 
   useEffect(() => {
     const handleTabClose = (event) => {
-      client.post("/api/logout", {})
-        .then(function (res) {
-          setCurrentUser(null);
-        }).catch(error => {
-          console.error("Logout error:", error);
-        });
-
-      // Optionally, show a confirmation dialog (this line is commented out as it's often not necessary):
-      // event.returnValue = 'Are you sure you want to leave?';
+      // Use performance API to check if it's a reload (TYPE_RELOAD = 1)
+      if (performance.navigation.type !== performance.navigation.TYPE_RELOAD) {
+        // If not a reload, proceed with logout
+        client.post("/api/logout", {})
+          .then(function (res) {
+            setCurrentUser(null);
+          }).catch(error => {
+            console.error("Logout error:", error);
+          });
+      }
     };
 
-    // Add event listener
+    // Add event listener for tab close
     window.addEventListener("beforeunload", handleTabClose);
 
     // Clean up event listener on component unmount
@@ -138,8 +139,9 @@ const Header = () => {
           </DropdownToggle>
           <DropdownMenu>
             <DropdownItem header>{currentUser ? `Salut, ${currentUser.username}` : 'Guest'}</DropdownItem>
-            <DropdownItem>Mon Compte</DropdownItem>
-            <DropdownItem>Modifier Profile</DropdownItem>
+            <DropdownItem onClick={() => navigate('/profile')}>
+  Mon Compte
+</DropdownItem>
             <DropdownItem divider />
             <form onSubmit={submitLogout}>
               <Button type="submit" variant="light">Se déconnecter</Button>

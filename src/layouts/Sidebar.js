@@ -37,15 +37,15 @@ const navigation = [
     roles: ["employe"],
   },
   {
-    title: "Gestion des salles",
-    href: "/boxComponentBl",
-    icon: "bi bi-buildings",
+    title: "Affectation salle-examens",
+    href: "/Salle_examen-list",
+    icon: "bi bi-building-add",
     roles: ["employe"],
   },
   {
-    title: "Affectation des salles des examens",
-    href: "/Salle_examen-list",
-    icon: "bi bi-newspaper",
+    title: "Affectation niveaux-modules",
+    href: "/Module_niveau-list",
+    icon: "bi bi-border-style",
     roles: ["employe"],
   },
   {
@@ -54,15 +54,10 @@ const navigation = [
     icon: "bi bi-person-video2",
     roles: ["employe"],
   },
-  {
-    title: "Affectation des niveaux aux modules",
-    href: "/Module_niveau-list",
-    icon: "bi bi-newspaper",
-    roles: ["employe"],
-  },
+
   {
     title: "Gestion des surveillances",
-    href: "/forms",
+    href: "/SurveillanceList",
     icon: "bi bi-eye-fill",
     roles: ["enseignant", "employe"],
   },

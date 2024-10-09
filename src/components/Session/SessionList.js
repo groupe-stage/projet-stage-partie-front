@@ -3,12 +3,7 @@ import axios from 'axios';
 import { Row, Col, Table, Card, CardTitle, CardBody, Button, ButtonGroup, FormGroup, Input } from 'reactstrap';
 import { FaEdit, FaTrashAlt, FaPlus, FaSortAlphaDown, FaSortAlphaUp } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
-import './SessionList.css';
-
-// Configurer Axios pour inclure le token CSRF
-axios.defaults.xsrfCookieName = 'csrftoken';
-axios.defaults.xsrfHeaderName = 'X-CSRFToken';
-axios.defaults.withCredentials = true;
+import './SessionList.css'; // Assurez-vous d'inclure votre fichier CSS
 
 const SessionList = () => {
   const [sessions, setSessions] = useState([]);
@@ -18,9 +13,10 @@ const SessionList = () => {
   const [sortOrder, setSortOrder] = useState('asc'); // 'asc' ou 'desc'
 
   useEffect(() => {
-    axios.get('http://127.0.0.1:8000/session/displayall')
+    axios.get("http://127.0.0.1:8000/session/displayall")
       .then(response => {
         setSessions(response.data);
+        setFilteredSessions(response.data); // Initialiser les sessions filtrées avec toutes les sessions
       })
       .catch(error => {
         console.error("Il y a eu une erreur lors de la récupération des sessions!", error);

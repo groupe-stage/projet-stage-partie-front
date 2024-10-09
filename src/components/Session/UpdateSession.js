@@ -3,7 +3,6 @@ import axios from 'axios';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Row, Col, Card, CardTitle, CardBody, Form, FormGroup, Label, Input, Button } from 'reactstrap';
 
-// Utility function to get the CSRF token from cookies
 function getCookie(name) {
   let cookieValue = null;
   if (document.cookie && document.cookie !== '') {
@@ -23,6 +22,8 @@ const UpdateSession = () => {
   const [sessionData, setSessionData] = useState({
     nom_session: '',
     type_session: '',
+    date_d: '',  // New field
+    date_f: ''   // New field
   });
   const [message, setMessage] = useState('');
   const { id_session } = useParams();
@@ -31,9 +32,7 @@ const UpdateSession = () => {
   useEffect(() => {
     const fetchSession = async () => {
       try {
-        console.log(`Fetching session with ID: ${id_session}`);
         const response = await axios.get(`http://127.0.0.1:8000/session/updateSession/${id_session}/`);
-        console.log('Session data fetched:', response.data);
         setSessionData(response.data);
       } catch (error) {
         console.error('Erreur lors de la récupération des données session:', error);
@@ -53,14 +52,13 @@ const UpdateSession = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Retrieve CSRF token from cookies
     const csrftoken = getCookie('csrftoken');
 
     try {
       await axios.put(`http://127.0.0.1:8000/session/updateSession/${id_session}/`, sessionData, {
         headers: {
           'Content-Type': 'application/json',
-          'X-CSRFToken': csrftoken,  // Include CSRF token in the headers
+          'X-CSRFToken': csrftoken,
         },
       });
       setMessage('Session mis à jour avec succès!');
@@ -107,6 +105,28 @@ const UpdateSession = () => {
                   <option value="decembre">Décembre</option>
                   <option value="septembre">Septembre</option>
                 </Input>
+              </FormGroup>
+              <FormGroup>
+                <Label for="date_d">Date de début</Label>
+                <Input
+                  id="date_d"
+                  name="date_d"
+                  type="date"
+                  value={sessionData.date_d}
+                  onChange={handleChange}
+                  required
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label for="date_f">Date de fin</Label>
+                <Input
+                  id="date_f"
+                  name="date_f"
+                  type="date"
+                  value={sessionData.date_f}
+                  onChange={handleChange}
+                  required
+                />
               </FormGroup>
               <Button type="submit">Mettre à jour la session</Button>
             </Form>

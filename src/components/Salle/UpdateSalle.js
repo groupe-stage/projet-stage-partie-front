@@ -29,6 +29,7 @@ const EditSalle = () => {
     capacite: '',
     dispo: true,
     id_bloc: '',
+    id_examen: ''
   });
   
   const [blocs, setBlocs] = useState([]);

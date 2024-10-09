@@ -5,7 +5,7 @@ import { FaTrashAlt, FaPlus } from 'react-icons/fa';
 import './Module_niveauList.css';
 import { Link } from 'react-router-dom';
 
-// Function to get the value of a cookie by its name
+// Fonction pour obtenir la valeur d'un cookie par son nom
 function getCookie(name) {
   let cookieValue = null;
   if (document.cookie && document.cookie !== '') {
@@ -21,7 +21,7 @@ function getCookie(name) {
   return cookieValue;
 }
 
-// Default Axios configuration to include CSRF cookie
+// Configuration par défaut pour Axios pour inclure le cookie CSRF
 axios.defaults.xsrfCookieName = 'csrftoken';
 axios.defaults.xsrfHeaderName = 'X-CSRFToken';
 axios.defaults.withCredentials = true;
@@ -32,32 +32,32 @@ const Module_niveauList = () => {
   const [modules, setModules] = useState([]);
 
   useEffect(() => {
-    // Fetch data for modniv
+    // Récupère les données pour modniv
     axios.get('http://127.0.0.1:8000/modniv/all/')
       .then(response => {
         setModniv(response.data);
       })
       .catch(error => {
-        console.error("Error fetching modniv data:", error);
+        console.error("Erreur lors de la récupération des données modniv :", error);
       });
 
-    // Fetch data for modules
+    // Récupère les données pour les modules
     const fetchModules = async () => {
       try {
         const response = await axios.get('http://127.0.0.1:8000/module/displayall');
         setModules(response.data);
       } catch (error) {
-        console.error("Error fetching modules:", error);
+        console.error("Erreur lors de la récupération des modules :", error);
       }
     };
 
-    // Fetch data for niveaux
+    // Récupère les données pour les niveaux
     const fetchNiveaux = async () => {
       try {
         const response = await axios.get('http://127.0.0.1:8000/Niveau/displayallNiveaux');
         setNiveaux(response.data);
       } catch (error) {
-        console.error("Error fetching niveaux:", error);
+        console.error("Erreur lors de la récupération des niveaux :", error);
       }
     };
 
@@ -65,32 +65,32 @@ const Module_niveauList = () => {
     fetchNiveaux();
   }, []);
 
-  // Function to get the module name by ID
+  // Fonction pour obtenir le nom du module par ID
   const getModuleNameById = (id) => {
     const module = modules.find(module => module.id_module === id);
-    return module ? module.nom_module : 'Unknown';
+    return module ? module.nom_module : 'Inconnu';
   };
 
-  // Function to get the niveau name by ID
+  // Fonction pour obtenir le nom du niveau par ID
   const getNiveauNameById = (id) => {
     const niveau = niveaux.find(niveau => niveau.id_niveau === id);
-    return niveau ? niveau.libelleNiv : 'Unknown';
+    return niveau ? niveau.libelleNiv : 'Inconnu';
   };
 
-  // Function to handle delete
+  // Fonction pour gérer la suppression
   const handleDelete = (idmn) => {
-    const csrftoken = getCookie('csrftoken'); // Get CSRF token from cookie
+    const csrftoken = getCookie('csrftoken'); // Obtient le token CSRF du cookie
     axios.delete(`http://127.0.0.1:8000/modniv/delete/${idmn}/`, {
       headers: {
-        'X-CSRFToken': csrftoken // Include CSRF token in headers
+        'X-CSRFToken': csrftoken // Inclut le token CSRF dans les en-têtes
       }
     })
     .then(() => {
-      // Refresh the data after deletion
+      // Rafraîchit les données après suppression
       setModniv(modniv.filter(item => item.idmn !== idmn));
     })
     .catch(error => {
-      console.error("Error deleting item:", error);
+      console.error("Erreur lors de la suppression de l'élément :", error);
     });
   };
 
@@ -99,7 +99,7 @@ const Module_niveauList = () => {
       <Col lg="12">
         <Card>
           <CardTitle tag="h6" className="border-bottom p-3 mb-0">
-            List of Module-Niveau Assignments
+            Liste des Assignations Module-Niveau
           </CardTitle>
           <CardBody>
             <Table className="modern-table" responsive>
@@ -129,7 +129,7 @@ const Module_niveauList = () => {
             <div className="text-center mt-3">
               <Link to="/addModule_niveau">
                 <Button color="secondary">
-                  <FaPlus /> Add Assignment
+                  <FaPlus /> Ajouter une Affectation
                 </Button>
               </Link>
             </div>

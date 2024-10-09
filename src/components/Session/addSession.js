@@ -7,7 +7,6 @@ axios.defaults.xsrfCookieName = 'csrftoken';
 axios.defaults.xsrfHeaderName = 'X-CSRFToken';
 axios.defaults.withCredentials = true;
 
-// Fonction pour obtenir un cookie spécifique par son nom
 const getCookie = (name) => {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -27,9 +26,10 @@ const AddSession = () => {
     const [formData, setFormData] = useState({
         nom_session: '',
         type_session: '',
+        date_d: '',  // New field
+        date_f: ''   // New field
     });
 
-    // Gérer les changements dans le formulaire
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({
@@ -40,15 +40,14 @@ const AddSession = () => {
 
     const navigate = useNavigate();
 
-    // Soumettre le formulaire
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        const csrftoken = getCookie('csrftoken');  // Extraire dynamiquement le token CSRF
+        const csrftoken = getCookie('csrftoken');
 
         axios.post('http://127.0.0.1:8000/session/addSession/', formData, {
             headers: {
-                'X-CSRFToken': csrftoken  // Inclure le token CSRF dans les en-têtes
+                'X-CSRFToken': csrftoken
             }
         })
         .then(response => {
@@ -57,6 +56,8 @@ const AddSession = () => {
             setFormData({
                 nom_session: '',
                 type_session: '',
+                date_d: '',  // Reset new fields
+                date_f: ''
             });
         })
         .catch(error => {
@@ -101,6 +102,28 @@ const AddSession = () => {
                                     <option value="decembre">Décembre</option>
                                     <option value="septembre">Septembre</option>
                                 </Input>
+                            </FormGroup>
+                            <FormGroup>
+                                <Label for="date_d">Date de début</Label>
+                                <Input
+                                    id="date_d"
+                                    name="date_d"
+                                    type="date"
+                                    value={formData.date_d}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label for="date_f">Date de fin</Label>
+                                <Input
+                                    id="date_f"
+                                    name="date_f"
+                                    type="date"
+                                    value={formData.date_f}
+                                    onChange={handleChange}
+                                    required
+                                />
                             </FormGroup>
                             <Button type="submit">Ajouter la session</Button>
                         </Form>

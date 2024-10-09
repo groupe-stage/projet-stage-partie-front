@@ -34,13 +34,23 @@ const AddModule = () => {
     const [formData, setFormData] = useState({
         nom_module: '',
         duree_module: '',
+        id_niveau: '',
     });
 
+    const [niveaux, setNiveaux] = useState([]);
 
-    
     const navigate = useNavigate();
 
-    
+    useEffect(() => {
+        // Récupérer les données des niveaux
+        axios.get('http://127.0.0.1:8000/Niveau/displayallNiveaux/')
+            .then(response => {
+                setNiveaux(response.data);
+            })
+            .catch(error => {
+                console.error("Erreur lors de la récupération des niveaux!", error);
+            });
+    }, []);
 
     // Gérer les changements dans le formulaire
     const handleChange = (e) => {
@@ -67,7 +77,7 @@ const AddModule = () => {
             setFormData({
                 nom_module: '',
                 duree_module: '',
-                
+                id_niveau: '',
             });
         })
         .catch(error => {
@@ -97,22 +107,33 @@ const AddModule = () => {
                                 />
                             </FormGroup>
                             <FormGroup>
-  <Label for="duree_module">Durée (en heures)</Label>
-  <Input
-    id="duree_module"
-    name="duree_module"
-    type="select"
-    value={formData.duree_module}
-    onChange={handleChange}
-    required
-  >
-    <option value="">Sélectionnez une durée (en heure )</option>
-    <option value="21">21 </option>
-    <option value="42">42 </option>
-  </Input>
-</FormGroup>
-
-                           
+                                <Label for="duree_module">Durée (en heures)</Label>
+                                <Input
+                                    id="duree_module"
+                                    name="duree_module"
+                                    value={formData.duree_module}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label for="id_niveau">Niveau</Label>
+                                <Input
+                                    id="id_niveau"
+                                    name="id_niveau"
+                                    type="select"
+                                    value={formData.id_niveau}
+                                    onChange={handleChange}
+                                    required
+                                >
+                                    <option value="">Sélectionnez un niveau</option>
+                                    {niveaux.map(niveau => (
+                                        <option key={niveau.id_niveau} value={niveau.id_niveau}>
+                                            {niveau.libelleNiv}
+                                        </option>
+                                    ))}
+                                </Input>
+                            </FormGroup>
                             <Button type="submit">Ajouter le module</Button>
                         </Form>
                     </CardBody>

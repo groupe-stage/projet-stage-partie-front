@@ -73,15 +73,20 @@ const AddNiveau = () => {
 
   const validate = () => {
     const errors = {};
+    const startsWithNumber = /^[0-9]/;
+  
     if (!formData.libelleNiv.trim()) {
       errors.libelleNiv = 'Le libellé du niveau est requis.';
+    } else if (!startsWithNumber.test(formData.libelleNiv)) {
+      errors.libelleNiv = 'Le libellé du niveau doit commencer par un chiffre.';
     }
+  
     if (requiresSpecialite && !formData.specialite.trim()) {
       errors.specialite = 'La spécialité est requise lorsque le niveau nécessite une spécialité.';
     }
+  
     return errors;
   };
-
   const checkIfNiveauExists = () => {
     return existingNiveaux.some(niveau => 
       niveau.libelleNiv === formData.libelleNiv && 
@@ -150,7 +155,7 @@ const AddNiveau = () => {
           <CardBody>
             <Form onSubmit={handleSubmit}>
               <FormGroup>
-                <Label for="libelleNiv">Libellé du Niveau</Label>
+                <Label for="libelleNiv">Libellé du Niveau (ex : 1A)</Label>
                 <Input
                   id="libelleNiv"
                   name="libelleNiv"

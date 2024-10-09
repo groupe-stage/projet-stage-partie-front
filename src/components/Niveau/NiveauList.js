@@ -92,7 +92,7 @@ const NiveauList = () => {
             <Table className="modern-table" responsive>
               <thead>
                 <tr>
-                  <th>ID Niveau</th>
+
                   <th>Niveau</th>
                   <th>Spécialité</th>
                   <th>Nombre de Classes</th>
@@ -102,7 +102,7 @@ const NiveauList = () => {
               <tbody>
                 {filteredNiveaux.map(niveau => (
                   <tr key={niveau.id_niveau}>
-                    <td>{niveau.id_niveau}</td>
+ 
                     <td>{niveau.libelleNiv}</td>
                     <td>{niveau.specialite}</td>
                     <td>{niveau.nbclasseNiv}</td>

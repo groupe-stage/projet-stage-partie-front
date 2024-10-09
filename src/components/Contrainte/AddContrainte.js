@@ -29,22 +29,20 @@ const AddContrainte = () => {
         date_debut_contrainte: '',
         date_fin_contrainte: '',
         status_contrainte: '',
-        user: ''
+        id_user: ''
     });
 
     const [users, setUsers] = useState([]);
-
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Fetch users data
-        axios.get('http://127.0.0.1:8000/api/displayall')  // Adjust the endpoint as needed
-        .then(response => {
-            setUsers(response.data);  // Ensure the response contains an array of users
-        })
-        .catch(error => {
-            console.error('Erreur lors de la récupération des utilisateurs!', error);
-        });
+        axios.get('http://127.0.0.1:8000/api/displayall')
+            .then(response => {
+                setUsers(response.data);
+            })
+            .catch(error => {
+                console.error("Erreur lors de la récupération des utilisateurs!", error);
+            });
     }, []);
 
     const handleChange = (e) => {
@@ -61,7 +59,7 @@ const AddContrainte = () => {
 
         axios.post('http://127.0.0.1:8000/Contrainte/addContrainte/', formData, {
             headers: {
-                'X-CSRFToken': csrftoken  // Include CSRF token in the headers
+                'X-CSRFToken': csrftoken
             }
         })
             .then(response => {
@@ -73,7 +71,7 @@ const AddContrainte = () => {
                     date_debut_contrainte: '',
                     date_fin_contrainte: '',
                     status_contrainte: '',
-                    user: ''
+                    id_user: ''
                 });
             })
             .catch(error => {
@@ -97,10 +95,17 @@ const AddContrainte = () => {
                                 <Input
                                     id="nom_contrainte"
                                     name="nom_contrainte"
+                                    type="select"
                                     value={formData.nom_contrainte}
                                     onChange={handleChange}
                                     required
-                                />
+                                >
+                                    <option value="">Sélectionnez une contrainte</option>
+                                    <option value="enceinte">Enceinte</option>
+                                    <option value="congé">Congé</option>
+                                    <option value="congé de maladie">Congé de maladie</option>
+                                    <option value="état de santé">État de santé</option>
+                                </Input>
                             </FormGroup>
                             <FormGroup>
                                 <Label for="type_contrainte">Type de Contrainte</Label>
@@ -145,23 +150,23 @@ const AddContrainte = () => {
                                 />
                             </FormGroup>
                             <FormGroup>
-    <Label for="user">Nom d'utilisateur</Label>
-    <Input
-        id="user"
-        name="user"
-        type="select"
-        value={formData.user}
-        onChange={handleChange}
-        required
-    >
-        <option value="">Sélectionnez un utilisateur</option>
-        {users.map(user => (
-            <option key={user.user_id} value={user.user_id}>
-                {user.username}  
-            </option>
-        ))}
-    </Input>
-</FormGroup>
+                                <Label for="id_user">Utilisateur</Label>
+                                <Input
+                                    id="id_user"
+                                    name="id_user"
+                                    type="select"
+                                    value={formData.id_user}
+                                    onChange={handleChange}
+                                    required
+                                >
+                                    <option value="">Sélectionnez un utilisateur</option>
+                                    {users.map(user => (
+                                        <option key={user.id} value={user.id}>
+                                            {user.user_id}
+                                        </option>
+                                    ))}
+                                </Input>
+                            </FormGroup>
                             <Button type="submit">Ajouter la Contrainte</Button>
                         </Form>
                     </CardBody>

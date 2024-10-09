@@ -15,7 +15,7 @@ import {
   Spinner
 } from 'reactstrap';
 
-// Function to get the value of a cookie by its name
+// Fonction pour obtenir la valeur d'un cookie par son nom
 const getCookie = (name) => {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -31,10 +31,10 @@ const getCookie = (name) => {
     return cookieValue;
 };
 
-const AddModule_niveau = () => {
+const AddModuleNiveau = () => {
     const [formData, setFormData] = useState({
         id_module: '',
-        id_niveaux: [],  // To handle multiple selected Niveaux
+        id_niveaux: [],  // Pour gérer plusieurs niveaux sélectionnés
     });
     const [niveaux, setNiveaux] = useState([]);
     const [modules, setModules] = useState([]);
@@ -43,52 +43,52 @@ const AddModule_niveau = () => {
     const [existingCombos, setExistingCombos] = useState([]);
 
     useEffect(() => {
-        // Fetch data for modules
+        // Récupérer les données pour les modules
         axios.get('http://127.0.0.1:8000/module/displayall')
             .then(response => {
                 setModules(response.data);
             })
             .catch(error => {
-                console.error('Erreur lors de la récupération des modules!', error);
+                console.error('Erreur lors de la récupération des modules !', error);
                 setError('Erreur lors de la récupération des modules.');
             });
 
-        // Fetch data for niveaux
+        // Récupérer les données pour les niveaux
         axios.get('http://127.0.0.1:8000/Niveau/displayallNiveaux')
             .then(response => {
                 setNiveaux(response.data);
             })
             .catch(error => {
-                console.error('Erreur lors de la récupération des niveaux!', error);
+                console.error('Erreur lors de la récupération des niveaux !', error);
                 setError('Erreur lors de la récupération des niveaux.');
             });
 
-        // Fetch existing combinations
+        // Récupérer les combinaisons existantes
         axios.get('http://127.0.0.1:8000/modniv/displayall/')
             .then(response => {
                 setExistingCombos(response.data);
             })
             .catch(error => {
-                console.error('Erreur lors de la récupération des combinaisons existantes!', error);
+                console.error('Erreur lors de la récupération des combinaisons existantes !', error);
             });
     }, []);
 
-    // Handle form changes
+    // Gérer les changements de formulaire
     const handleChange = (e) => {
         const { name, value, checked } = e.target;
 
         if (name === "id_niveaux") {
-            const selectedNiveaux = formData.id_niveaux.slice();  // Copy the array
-            const parsedValue = parseInt(value, 10);  // Parse value to an integer
+            const selectedNiveaux = formData.id_niveaux.slice();  // Copier le tableau
+            const parsedValue = parseInt(value, 10);  // Convertir la valeur en entier
 
             if (checked) {
                 if (!selectedNiveaux.includes(parsedValue)) {
-                    selectedNiveaux.push(parsedValue);  // Add selected niveau
+                    selectedNiveaux.push(parsedValue);  // Ajouter le niveau sélectionné
                 }
             } else {
-                const index = selectedNiveaux.indexOf(parsedValue);  // Find index of unselected niveau
+                const index = selectedNiveaux.indexOf(parsedValue);  // Trouver l'index du niveau désélectionné
                 if (index > -1) {
-                    selectedNiveaux.splice(index, 1);  // Remove unselected niveau
+                    selectedNiveaux.splice(index, 1);  // Supprimer le niveau désélectionné
                 }
             }
 
@@ -106,7 +106,7 @@ const AddModule_niveau = () => {
 
     const navigate = useNavigate();
 
-    // Handle form submission
+    // Gérer la soumission du formulaire
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -115,12 +115,12 @@ const AddModule_niveau = () => {
         const csrftoken = getCookie('csrftoken');
 
         try {
-            // Create a set of existing combinations for fast lookup
+            // Créer un ensemble de combinaisons existantes pour une recherche rapide
             const existingComboSet = new Set(
                 existingCombos.map(combo => `${combo.id_module}-${combo.id_niveau}`)
             );
 
-            // Filter out combinations that already exist
+            // Filtrer les combinaisons qui n'existent pas déjà
             const newCombos = formData.id_niveaux.filter(id_niveau => {
                 const comboKey = `${formData.id_module}-${id_niveau}`;
                 return !existingComboSet.has(comboKey);
@@ -131,7 +131,7 @@ const AddModule_niveau = () => {
                 return;
             }
 
-            // Create a promise for each selected Niveau that is not a duplicate
+            // Créer une promesse pour chaque niveau sélectionné qui n'est pas un doublon
             const requests = newCombos.map(id_niveau => {
                 return axios.post('http://127.0.0.1:8000/modniv/add/', {
                     id_module: formData.id_module,
@@ -143,7 +143,7 @@ const AddModule_niveau = () => {
                 });
             });
 
-            // Execute all promises
+            // Exécuter toutes les promesses
             await Promise.all(requests);
 
             alert('Affectations ajoutées avec succès !');
@@ -204,7 +204,7 @@ const AddModule_niveau = () => {
                                                     value={niveau.id_niveau}
                                                     checked={formData.id_niveaux.includes(niveau.id_niveau)}
                                                     onChange={handleChange}
-                                                    className="custom-checkbox"  // Apply custom class
+                                                    className="custom-checkbox"  // Appliquer la classe personnalisée
                                                 />
                                                 {niveau.libelleNiv}
                                             </Label>
@@ -228,4 +228,4 @@ const AddModule_niveau = () => {
     );
 };
 
-export default AddModule_niveau;
+export default AddModuleNiveau;

@@ -28,21 +28,12 @@ const UpdateContrainte = () => {
     date_debut_contrainte: '',
     date_fin_contrainte: '',
     status_contrainte: '',
-    user: ''
+    id_user: ''
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    // Fetch users data
-    axios.get('http://127.0.0.1:8000/api/displayall')  // Adjust the endpoint as needed
-    .then(response => {
-        setUsers(response.data);  // Ensure the response contains an array of users
-    })
-    .catch(error => {
-        console.error('Erreur lors de la récupération des utilisateurs!', error);
-    });
     // Fetch the current data of the contrainte
     axios.get(`http://127.0.0.1:8000/Contrainte/updateContrainte/${id_contrainte}/`)
       .then(response => {
@@ -155,23 +146,15 @@ const UpdateContrainte = () => {
                 />
               </FormGroup>
               <FormGroup>
-    <Label for="user">Nom d'utilisateur</Label>
-    <Input
-        id="user"
-        name="user"
-        type="select"
-        value={formData.user}
-        onChange={handleChange}
-        required
-    >
-        <option value="">Sélectionnez un utilisateur</option>
-        {users.map(user => (
-            <option key={user.user_id} value={user.user_id}>
-                {user.username}  
-            </option>
-        ))}
-    </Input>
-</FormGroup>
+                <Label for="id_user">ID de l'Utilisateur</Label>
+                <Input
+                  id="id_user"
+                  name="id_user"
+                  value={formData.id_user}
+                  onChange={handleChange}
+                  required
+                />
+              </FormGroup>
               <Button type="submit">Mettre à jour la Contrainte</Button>
             </Form>
           </CardBody>

@@ -13,6 +13,7 @@ import {
   Label,
   Input
 } from 'reactstrap';
+
 axios.defaults.xsrfCookieName = 'csrftoken';
 axios.defaults.xsrfHeaderName = 'X-CSRFToken';
 axios.defaults.withCredentials = true;
@@ -31,11 +32,19 @@ const getCookie = (name) => {
     }
     return cookieValue;
 };
+
 const AddBloc = () => {
     const [formData, setFormData] = useState({
         nom_bloc: '',
         nbretage: '',
     });
+
+    const [errors, setErrors] = useState({
+        nom_bloc: '',
+        nbretage: ''
+    });
+
+    const [isCheckingName, setIsCheckingName] = useState(false);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -43,32 +52,97 @@ const AddBloc = () => {
             ...formData,
             [name]: value
         });
+
+        // Clear error messages on input change
+        setErrors({
+            ...errors,
+            [name]: ''
+        });
+
+        // Check if the name is being checked
+        if (name === 'nom_bloc') {
+            setIsCheckingName(true);
+            checkBlocNameUnique(value);
+        }
     };
 
-    const navigate = useNavigate();
+    const checkBlocNameUnique = (name) => {
+        axios.get(`http://127.0.0.1:8000/bloc/checkNameUnique/${name}/`)
+            .then(response => {
+                if (response.data.exists) {
+                    setErrors(prevErrors => ({
+                        ...prevErrors,
+                        nom_bloc: 'Le nom du bloc existe déjà.'
+                    }));
+                } else {
+                    setErrors(prevErrors => ({
+                        ...prevErrors,
+                        nom_bloc: ''
+                    }));
+                }
+                setIsCheckingName(false);
+            })
+            .catch(error => {
+                console.error('Erreur lors de la vérification du nom du bloc!', error);
+                setIsCheckingName(false);
+            });
+    };
+
+    const validateForm = () => {
+        let isValid = true;
+        let newErrors = { nom_bloc: '', nbretage: '' };
+
+        // Validate nom_bloc
+        const nomBlocPattern = /^[A-M]/;
+        if (!nomBlocPattern.test(formData.nom_bloc)) {
+            newErrors.nom_bloc = 'Le nom du bloc doit commencer par une lettre A-M';
+            isValid = false;
+        }
+
+        if (errors.nom_bloc) {
+            newErrors.nom_bloc = errors.nom_bloc;
+            isValid = false;
+        }
+
+        // Validate nbretage
+        const nbretage = parseInt(formData.nbretage, 10);
+        if (isNaN(nbretage) || nbretage < 1 || nbretage > 4) {
+            newErrors.nbretage = 'Le nombre d\'étages doit être compris entre 1 et 4.';
+            isValid = false;
+        }
+
+        setErrors(newErrors);
+        return isValid;
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        if (!validateForm() || isCheckingName) {
+            return;
+        }
+
         const csrftoken = getCookie('csrftoken');  // Dynamically extract CSRF token
 
-        axios.post('http://127.0.0.1:8000/bloc/addBloc/', formData,{
+        axios.post('http://127.0.0.1:8000/bloc/addBloc/', formData, {
             headers: {
                 'X-CSRFToken': csrftoken  // Include CSRF token in the headers
             }
         })
         .then(response => {
-            alert('Bloc added successfully!');
-            navigate('/bloc-list'); 
+            alert('Bloc ajouté avec succès!');
+            navigate('/bloc-list');
             setFormData({
                 nom_bloc: '',
                 nbretage: '',
             });
         })
         .catch(error => {
-            console.error('There was an error adding the bloc!', error);
-            alert('Error adding bloc.');
+            console.error('Il y a eu une erreur lors de l\'ajout du bloc!', error);
+            alert('Erreur lors de l\'ajout du bloc.');
         });
     };
+
+    const navigate = useNavigate();
 
     return (
         <Row>
@@ -89,6 +163,7 @@ const AddBloc = () => {
                                     onChange={handleChange}
                                     required
                                 />
+                                {errors.nom_bloc && <div className="text-danger">{errors.nom_bloc}</div>}
                             </FormGroup>
                             <FormGroup>
                                 <Label for="nbretage">Nombre d'étages</Label>
@@ -100,6 +175,7 @@ const AddBloc = () => {
                                     type="number"
                                     required
                                 />
+                                {errors.nbretage && <div className="text-danger">{errors.nbretage}</div>}
                             </FormGroup>
                             <Button type="submit">Ajouter le Bloc</Button>
                         </Form>

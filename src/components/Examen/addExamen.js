@@ -13,7 +13,6 @@ import {
   Label,
   Input
 } from 'reactstrap';
-
 axios.defaults.xsrfCookieName = 'csrftoken';
 axios.defaults.xsrfHeaderName = 'X-CSRFToken';
 axios.defaults.withCredentials = true;
@@ -32,11 +31,9 @@ const getCookie = (name) => {
     }
     return cookieValue;
 };
-
 const AddExamen = () => {
     const [formData, setFormData] = useState({
         nom_examen: '',
-        date_examen: '',
         duree_examen: '',
         type_examen: '',
         id_session: '',
@@ -50,7 +47,6 @@ const AddExamen = () => {
         // Fetch sessions from the API
         axios.get('http://127.0.0.1:8000/session/displayall')
             .then(response => {
-                console.log('Sessions fetched:', response.data); // Ajout de log
                 setSessions(response.data);
             })
             .catch(error => {
@@ -75,10 +71,10 @@ const AddExamen = () => {
         });
     };
 
-    const navigate = useNavigate();
+    const navigate = useNavigate();  // Déclaration correcte
     const handleSubmit = (e) => {
         e.preventDefault();
-        const csrftoken = getCookie('csrftoken');
+        const csrftoken = getCookie('csrftoken');  // Dynamically extract CSRF token
 
         const dataToSend = new FormData();
         Object.keys(formData).forEach(key => {
@@ -87,7 +83,7 @@ const AddExamen = () => {
 
         axios.post('http://127.0.0.1:8000/examen/addExamen/', dataToSend, {
             headers: {
-                'X-CSRFToken': csrftoken
+                'X-CSRFToken': csrftoken  // Include CSRF token in the headers
             }
         })
         .then(response => {
@@ -95,7 +91,7 @@ const AddExamen = () => {
             navigate('/examen-list'); 
             setFormData({
                 nom_examen: '',
-                date_examen: '',
+                
                 duree_examen: '',
                 type_examen: '',
                 id_session: '',
@@ -127,19 +123,10 @@ const AddExamen = () => {
                                     onChange={handleChange}
                                     required
                                 />
+                            
                             </FormGroup>
                     
-                            <FormGroup>
-                                <Label for="date_examen">Date</Label>
-                                <Input
-                                    id="date_examen"
-                                    name="date_examen"
-                                    type="date"
-                                    value={formData.date_examen}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </FormGroup>
+
                             <FormGroup>
                                 <Label for="duree_examen">Durée (en heure)</Label>
                                 <Input
@@ -160,11 +147,9 @@ const AddExamen = () => {
                                     type="select"
                                     required
                                 >
-                                    <option value="">Sélectionnez le type d'examen</option>
+                                   <option value="">Sélectionnez le type d'examen</option>
                                     <option value="theorique">Théorique</option>
                                     <option value="pratique">Pratique</option>
-                                    <option value="soutenance">Soutenance</option>
-                                    <option value="stage">Stage</option>
                                 </Input>
                             </FormGroup>
 
@@ -179,15 +164,11 @@ const AddExamen = () => {
                                     required
                                 >
                                     <option value="">Sélectionnez une session</option>
-                                    {sessions.length > 0 ? (
-                                        sessions.map(session => (
-                                            <option key={session.id_session} value={session.id_session}>
-                                                {session.nom_session}
-                                            </option>
-                                        ))
-                                    ) : (
-                                        <option value="">Aucune session disponible</option>
-                                    )}
+                                    {sessions.map(session => (
+                                        <option key={session.id_session} value={session.id_session}>
+                                            {session.nom_session}
+                                        </option>
+                                    ))}
                                 </Input>
                             </FormGroup>
 
@@ -202,15 +183,11 @@ const AddExamen = () => {
                                     required
                                 >
                                     <option value="">Sélectionnez un module</option>
-                                    {modules.length > 0 ? (
-                                        modules.map(module => (
-                                            <option key={module.id_module} value={module.id_module}>
-                                                {module.nom_module}
-                                            </option>
-                                        ))
-                                    ) : (
-                                        <option value="">Aucun module disponible</option>
-                                    )}
+                                    {modules.map(module => (
+                                        <option key={module.id_module} value={module.id_module}>
+                                            {module.nom_module}
+                                        </option>
+                                    ))}
                                 </Input>
                             </FormGroup>
                            

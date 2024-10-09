@@ -7,7 +7,6 @@ import { useNavigate } from 'react-router-dom';
 const UpdateExamen = () => {
   const [examenData, setExamenData] = useState({
     nom_examen: '',
-    date_examen: '',
     duree_examen: '',
     type_examen: '',
     id_session: '',
@@ -123,17 +122,7 @@ const UpdateExamen = () => {
                 />
               </FormGroup>
 
-              <FormGroup>
-                <Label for="date_examen">Date</Label>
-                <Input
-                  id="date_examen"
-                  name="date_examen"
-                  type="date"
-                  value={examenData.date_examen}
-                  onChange={handleChange}
-                  required
-                />
-              </FormGroup>
+              
 
               <FormGroup>
                 <Label for="duree_examen">Durée (en heure)</Label>

@@ -20,6 +20,7 @@ const AddUser = lazy(() => import("../components/Users/addUser.js"));
 const UserList = lazy(() => import("../components/Users/UserList.js"));
 const UserUpdate = lazy(() => import("../components/Users/UpdateUser.js"));
 const UserDelete = lazy(() => import("../components/Users/DeleteUser.js"));
+const Profile = lazy(() => import("../components/Users/profile.js"));
 
 
 const SessionList = lazy(() => import("../components/Session/SessionList.js"));
@@ -75,6 +76,7 @@ const DeleteSalle = lazy(() => import("../components/Salle/DeleteSalle.js"));
 const AddSalle_examen  = lazy(() => import("../components/Salle_examen/addSalle_examen.js"));
 const Salle_examenList = lazy(() => import("../components/Salle_examen/Salle_examenList.js"));
 const DeleteSalle_examen = lazy(() => import("../components/Salle_examen/DeleteSalle_examen.js"));
+const UpdateSalle_examen = lazy(() => import("../components/Salle_examen/update_salle_ex.js"));
 
 const AddModule_niveau  = lazy(() => import("../components/Module_niveau/addModule_niveau.js"));
 const Module_niveauList = lazy(() => import("../components/Module_niveau/Module_niveauList.js"));
@@ -84,6 +86,14 @@ const BoxComponent = lazy(() => import("../components/Examen/BoxComponent.js"));
 const BoxComponentUp = lazy(() => import("../components/Unité/BoxComponentUp.js"));
 const BoxComponentCl = lazy(() => import("../components/Classe/boxComponentCl.js"));
 const BoxComponentBl = lazy(() => import("../components/Bloc/boxComponentBl.js"));
+
+
+const SurveillanceList = lazy(() => import("../components/Surveillance/SurveillanceList.js"));
+const AddSurveillance = lazy(() => import("../components/Surveillance/AddSurveillance.js"));
+const UpdateSurveillance = lazy(() => import("../components/Surveillance/UpdateSurveillance.js"));
+const DeleteSurveillance = lazy(() => import("../components/Surveillance/DeleteSurveillance.js"));
+
+
 
 const NotFound = lazy(() => import("../components/NotFound.js"));
 
@@ -119,6 +129,7 @@ const ThemeRoutes = [
       { path: "/user-list", exact: true, element:<UserList /> }, // Ajouter la route ici
       { path: "/user-up/:user_id", exact: true, element:< UserUpdate/> }, // Ajouter la route ici
       { path: "/user-del/:user_id", exact: true, element:< UserDelete/> }, // Ajouter la route ici
+      { path: "/profile", element: <Profile/> },
       
 
       { path: "/session-list", exact: true, element:<SessionList /> }, // Ajouter la route ici
@@ -172,6 +183,7 @@ const ThemeRoutes = [
       { path: "/addSalle_examen", element: <AddSalle_examen /> },
       { path: "/Salle_examen-list", exact: true, element:<Salle_examenList /> }, // Ajouter la route ici
       { path: "/Salle_examen-del/:id_salle", exact: true, element:< DeleteSalle_examen/> }, // Ajouter la route ici
+      { path: "/Salle_examen-edit/:id_salle/:id_examen", exact: true, element: <UpdateSalle_examen /> },
 
       { path: "/addModule_niveau", element: <AddModule_niveau /> },
       { path: "/Module_niveau-list", exact: true, element:<Module_niveauList /> }, // Ajouter la route ici
@@ -182,6 +194,13 @@ const ThemeRoutes = [
       { path: "/boxComponentBl", exact: true, element:<BoxComponentBl /> }, // Ajouter la route ici
       { path: "/boxComponentCl", exact: true, element:<BoxComponentCl /> }, // Ajouter la route ici
       { path: "*", element: <NotFound /> },
+
+      { path: "/SurveillanceList", exact: true, element:<SurveillanceList /> }, // Ajouter la route ici
+      { path: "/addSurveillance", element: <AddSurveillance /> },
+      { path: "/update-surveillance/:id_surveillance", exact: true, element: <UpdateSurveillance /> },
+      { path: "/delete-surveillance/:id_surveillance", exact: true, element: <DeleteSurveillance /> },
+
+
       {
         path: "/test-loading", element: <LoadingScreenTest />, },
 
