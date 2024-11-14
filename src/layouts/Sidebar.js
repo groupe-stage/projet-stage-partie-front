@@ -13,7 +13,7 @@ const client = axios.create({
 
 const navigation = [
   {
-    title: "Tableau de bord",
+    title: "Acceuil",
     href: "/starter",
     icon: "bi bi-speedometer2",
     roles: ["employe", "enseignant"],
@@ -34,6 +34,12 @@ const navigation = [
     title: "Gestion des examens",
     href: "/boxComponent",
     icon: "bi bi-newspaper",
+    roles: ["employe"],
+  },
+  {
+    title: "Gestion des salles",
+    href: "/boxComponentBl",
+    icon: "bi bi-buildings",
     roles: ["employe"],
   },
   {

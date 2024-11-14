@@ -36,6 +36,7 @@ const AddExamen = () => {
         nom_examen: '',
         duree_examen: '',
         type_examen: '',
+        nbrclasse: '',
         id_session: '',
         id_module: '',
     });
@@ -96,6 +97,7 @@ const AddExamen = () => {
                 type_examen: '',
                 id_session: '',
                 id_module: '',
+                nbrclasse:'',
             });
         })
         .catch(error => {
@@ -133,6 +135,16 @@ const AddExamen = () => {
                                     id="duree_examen"
                                     name="duree_examen"
                                     value={formData.duree_examen}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </FormGroup>
+                            <FormGroup>
+                                <Label for="nbrclasse">Nombre des classes</Label>
+                                <Input
+                                    id="nbrclasse"
+                                    name="nbrclasse"
+                                    value={formData.nbrclasse}
                                     onChange={handleChange}
                                     required
                                 />
